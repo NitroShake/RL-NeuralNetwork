@@ -1,10 +1,14 @@
 ﻿using System;
 
-namespace RLNeuralNetwork // Note: actual namespace depends on the project name.
+namespace RLNeuralNetwork
 {
-    class NetworkLayer
+    abstract class NetworkLayer
     {
         internal double[,] weights;
+        internal double[] lastFeedForward;
+        internal double[,] losses;
+        internal NetworkLayer previousLayer;
+        internal double[] previousInputs;
         public NetworkLayer(int inputs, int nodes)
         {
             Random r = new Random();
@@ -19,11 +23,13 @@ namespace RLNeuralNetwork // Note: actual namespace depends on the project name.
         }
         public NetworkLayer(double[,] weights)
         {
+            previousLayer = null;
             this.weights = weights;
         }
 
         public double[] feedforward(double[] previousLayer)
         {
+            //TODO: throw exception for previousLayer/weight size mismatch
             double[] nodes = new double[weights.GetLength(1)];
             for (int i = 0; i < nodes.Length; i++)
             {
@@ -33,18 +39,51 @@ namespace RLNeuralNetwork // Note: actual namespace depends on the project name.
                     Console.WriteLine($"adding {previousLayer[j]} * {weights[j, i]} to {nodes[i]}");
                 }
                 nodes[i] = activationFunction(nodes[i]);
-                Console.WriteLine(nodes[i]);
+                //Console.WriteLine(nodes[i]);
             }
+            lastFeedForward = nodes;
             return nodes;
         }
 
 
-        internal virtual double activationFunction(double x)
+        internal abstract double activationFunction(double x);
+
+        internal abstract double activationDerivative(double x);
+        internal virtual void backPropagate()
+        {
+            double learningRate = 0.01;
+            if (previousLayer != null)
+            {
+                previousLayer.losses = new double[previousLayer.weights.GetLength(0), previousLayer.weights.GetLength(1)];
+                for (int i = 0; i < previousLayer.weights.GetLength(0); i++)
+                {
+                    for (int j = 0; j < previousLayer.weights.GetLength(1); j++)
+                    {
+                        previousLayer.losses[i, j] = weights[i, j] * losses[i, j] * activationDerivative(previousLayer.lastFeedForward[i]);
+                    }
+                }
+            }
+            for (int i = 0; i < weights.GetLength(0); i++)
+            {
+                for (int j = 0; j < weights.GetLength(1); j++)
+                {
+                    weights[i, j] = weights[i, j] - (learningRate * previousInputs[i] * losses[i, j]);
+                }
+            }
+        }
+    }
+
+    class OutputLayer : NetworkLayer
+    {
+        public OutputLayer(int inputs, int nodes) : base(inputs, nodes) { }
+        public OutputLayer(double[,] weights) : base(weights) { }
+
+        internal override double activationFunction(double x)
         {
             return x;
         }
 
-        internal virtual double activationDerivative(double x)
+        internal override double activationDerivative(double x)
         {
             return 1;
         }
@@ -67,7 +106,13 @@ namespace RLNeuralNetwork // Note: actual namespace depends on the project name.
             double y = activationFunction(x);
             return 1 - (y * y);
         }
+
+        internal override void backPropagate()
+        {
+            throw new NotImplementedException();
+        }
     }
+
     class NeuralNetwork
     {
         HiddenLayer[] hiddenLayers;
@@ -76,7 +121,15 @@ namespace RLNeuralNetwork // Note: actual namespace depends on the project name.
         public NeuralNetwork(HiddenLayer[] hiddenLayers, NetworkLayer outputLayer)
         {
             this.hiddenLayers = hiddenLayers;
+            for (int i = 1; i < hiddenLayers.Length; i++)
+            {
+                hiddenLayers[i].previousLayer = hiddenLayers[i - 1];
+            }
             this.outputLayer = outputLayer;
+            if (hiddenLayers.Length > 0)
+            {
+                outputLayer.previousLayer = hiddenLayers[hiddenLayers.Length - 1];
+            }
         }
 
         public double[] feedForward(double[] inputs)
@@ -86,6 +139,85 @@ namespace RLNeuralNetwork // Note: actual namespace depends on the project name.
                 inputs = hiddenLayers[i].feedforward(inputs);
             }
             return outputLayer.feedforward(inputs);
+        }
+
+        /// <summary>
+        /// An optimised feed-forward intended for multiple input sets where some of their inputs are equal. 
+        /// Precomputes the first hidden layer using the common inputs to re-use for each unique input set.
+        /// This implementation requires all of the common inputs to come before the unique inputs (i.e., the inputs have the same order as they would during regular feed-forward).
+        /// </summary>
+        /// <param name="equalInputs">The inputs that each input set has in common.</param>
+        /// <param name="uniqueInputs">The set of inputs that are unique to each input set.</param>
+        /// <returns></returns>
+        public double[,] optimisedFeedForward(double[] equalInputs, double[,] uniqueInputs)
+        {
+            if (hiddenLayers.Length == 0)
+            {
+                throw new Exception("Optimised feed-forward requires a hidden layer.");
+            }
+
+            //precompute first hidden layer
+            HiddenLayer layer = hiddenLayers[0];
+            double[] layerNodes = new double[layer.weights.GetLength(1)];
+            for (int i = 0; i < layer.weights.GetLength(1); i++)
+            {
+                for (int j = 0; j < equalInputs.Length; j++)
+                {
+                    layerNodes[i] += equalInputs[j] * layer.weights[j, i];
+                    //Console.WriteLine($"adding {previousLayer[j]} * {weights[j, i]} to {nodes[i]}");
+                }
+                //Console.WriteLine(nodes[i]);
+            }
+
+            double[] layer1NodesBackup = layerNodes;
+            int extraInputWeightIndex = equalInputs.Length;
+            double[,] results = new double[uniqueInputs.GetLength(0), outputLayer.weights.GetLength(1)];
+
+            //foreach unique input set
+            for (int i = 0; i < uniqueInputs.GetLength(0); i++)
+            {
+                layerNodes = layer1NodesBackup;
+                //finish computing first layer
+                for (int j = 0; j < layerNodes.Length; j++)
+                {
+                    for (int k = 0; k < uniqueInputs.GetLength(1); k++)
+                    {
+                        layerNodes[j] += uniqueInputs[i, k] * layer.weights[k + extraInputWeightIndex, j];
+                        Console.WriteLine($"adding {equalInputs[k]} * {layer.weights[k + extraInputWeightIndex, j]} to {layerNodes[j]}");
+                    }
+                    layerNodes[j] = layer.activationFunction(layerNodes[j]);
+                }
+
+                //compute other layers as normal
+                for (int j = 1; j < hiddenLayers.Length; j++)
+                {
+                    layerNodes = feedForward(layerNodes);
+                }
+                layerNodes = outputLayer.feedforward(layerNodes);
+
+                for (int j = 0; j < results.GetLength(1); j++)
+                {
+                    results[i, j] = layerNodes[j];
+                }
+            }
+
+            return results;
+        }
+
+        public void backPropagate(double[] inputs, double[] actualValues)
+        {
+            double[] ff = feedForward(inputs);
+            double[,] losses = new double[ff.Length, 1];
+            for (int i = 0; i < losses.Length; i++)
+            {
+                losses[i, 0] = ff[i] - actualValues[i];
+            }
+            outputLayer.losses = losses;
+            outputLayer.backPropagate();
+            for (int i = hiddenLayers.Length - 1; i >= 0; i--)
+            {
+                hiddenLayers[i].backPropagate();
+            }
         }
     }
 
@@ -104,7 +236,7 @@ namespace RLNeuralNetwork // Note: actual namespace depends on the project name.
             double value;
         }
 
-        static InputData[]? ReadOverwatchResults(string filePath)
+        static InputData[] ReadOverwatchResults(string filePath)
         {
             StreamReader sr = new StreamReader(filePath);
             string arrayString = sr.ReadToEnd();
@@ -167,8 +299,10 @@ namespace RLNeuralNetwork // Note: actual namespace depends on the project name.
             //layers.Add(new HiddenLayer(new double[,] { { 0.3, 0.6, -0.4 }, { 0.8, -0.7, -0.5 } }));
             layers.Add(new HiddenLayer(new double[,] { { 0.3, 0.8 }, { 0.6, -0.7 }, { -0.4, -0.5 } }));
 
-            NeuralNetwork NN = new NeuralNetwork(layers.ToArray(), new NetworkLayer(new double[,] { { -0.3 }, { 0.2 } }));
+            NeuralNetwork NN = new NeuralNetwork(layers.ToArray(), new OutputLayer(new double[,] { { -0.3 }, { 0.2 } }));
             Console.WriteLine(NN.feedForward(new double[] { 0.36, -1, 0.4 })[0]);
+            Console.WriteLine(NN.optimisedFeedForward(new double[] { 0.36, -1 }, new double[,] { { 0.4 } })[0,0]);
+            //NN.backPropagate(new double[] { 0.36, -1, 0.4 }, new double[] { 5 });
             double e = 2;
         }
     }
