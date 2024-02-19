@@ -21,9 +21,9 @@ namespace RLNeuralNetwork
             this.wideWeightBaseLearningRate = wideWeightBaseLearningRate;
             wideWeights = new double[wideInputs, nodes];
             Random r = new Random();
-            for (int i = 0; i < weights.GetLength(0); i++)
+            for (int i = 0; i < wideWeights.GetLength(0); i++)
             {
-                for (int j = 0; j < weights.GetLength(0); j++)
+                for (int j = 0; j < wideWeights.GetLength(1); j++)
                 {
                     wideWeights[i, j] = (double)r.NextDouble() * 0.00001;
                 }

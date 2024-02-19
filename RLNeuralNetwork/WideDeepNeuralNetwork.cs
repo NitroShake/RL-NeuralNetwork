@@ -37,15 +37,36 @@ namespace RLNeuralNetwork
                 {
                     for (int k = 0; k < wideEqualInputs.Length; k++)
                     {
-                        predicts[i, j] += wideEqualInputs[k] * ((WideDeepOutputLayer)outputLayer).wideWeights[k];
+                        predicts[i, j] += wideEqualInputs[k] * ((WideDeepOutputLayer)outputLayer).wideWeights[k, j];
                     }
                     for (int k = 0; k < wideUniqueInputs.GetLength(1); k++)
                     {
-                        predicts[i, j] += wideUniqueInputs[i, k] * ((WideDeepOutputLayer)outputLayer).wideWeights[baseK + k];
+                        predicts[i, j] += wideUniqueInputs[i, k] * ((WideDeepOutputLayer)outputLayer).wideWeights[baseK + k, j];
                     }
                 }
             }
             return predicts;
+        }
+
+        public override void backPropagate(double[] inputs, double[] actualValues, double learningRateMulti, bool printLoss = false)
+        {
+
+            base.backPropagate(inputs, actualValues, learningRateMulti, printLoss);
+        }
+
+        public void backPropagate(double[] inputs, double[] wideInputs, double[] actualValues, double learningRateMulti, bool printLoss = false)
+        {
+            double[] ff = wideDeepFeedForward(inputs, wideInputs);
+            double[] losses = new double[ff.Length];
+            for (int i = 0; i < losses.Length; i++)
+            {
+                losses[i] = ff[i] - actualValues[i];
+            }
+            if (printLoss)
+            {
+                Console.WriteLine(losses[0]);
+            }
+            outputLayer.backPropagate(losses, learningRateMulti);
         }
     }
 }

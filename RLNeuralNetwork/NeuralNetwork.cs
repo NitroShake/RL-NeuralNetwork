@@ -97,7 +97,7 @@ namespace RLNeuralNetwork
             return results;
         }
 
-        public void backPropagate(double[] inputs, double[] actualValues, double learningRateMulti, bool printLoss = false)
+        virtual public void backPropagate(double[] inputs, double[] actualValues, double learningRateMulti, bool printLoss = false)
         {
             double[] ff = feedForward(inputs);
             double[] losses = new double[ff.Length];
