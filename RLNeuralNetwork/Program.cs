@@ -33,7 +33,7 @@ namespace RLNeuralNetwork
             this.baseLearningRate = baseLearningRate;
         }
 
-        public double[] feedforward(double[] previousLayer)
+        public virtual double[] feedforward(double[] previousLayer)
         {
             //TODO: throw exception for previousLayer/weight size mismatch
             double[] nodes = new double[weights.GetLength(1)];
@@ -111,6 +111,54 @@ namespace RLNeuralNetwork
         internal override double activationDerivative(double x)
         {
             return 1;
+        }
+    }
+
+    class WideAndDeepOutputLayer : OutputLayer
+    {
+        internal double[] wideWeights;
+        internal double[] lastWideInputs;
+        public WideAndDeepOutputLayer(double[,] weights, double[] wideWeights, double baseLearningRate) : base(weights, baseLearningRate) 
+        {
+            this.wideWeights = wideWeights;
+        }
+        public WideAndDeepOutputLayer(int inputs, int wideInputs, int nodes, double baseLearningRate) : base(inputs, nodes, baseLearningRate) 
+        {
+            wideWeights = new double[wideInputs];
+            Random r = new Random();
+            for (int i = 0; i < weights.GetLength(0); i++)
+            {
+                wideWeights[i] = (double)r.NextDouble() * 0.00001;
+            }
+        }
+
+        public override double[] feedforward(double[] previousLayer)
+        {
+            throw new Exception("Use feedforward(previousLayer, wideLayer) instead.");
+        }
+
+        public double[] feedforward(double[] previousLayer, double[] wideLayer)
+        {
+            //NOTE: This implementation only works if the activation function is f(x) = x.
+            double[] nodes = feedforward(previousLayer);
+            for (int i = 0; i < nodes.Length; i++)
+            {
+                for (int j = 0; j < wideLayer.Length; j++)
+                {
+                    nodes[i] += wideLayer[j] * wideWeights[j];
+                }
+            }
+            lastWideInputs = wideLayer;
+            return nodes;
+        }
+
+        internal override void backPropagate(double[] losses, double learningRateMulti)
+        {
+            for (int i = 0; i < losses.Length; i++)
+            {
+                wideWeights[i] = wideWeights[i] - (lastWideInputs[i] * learningRateMulti * losses[i]);
+            }
+            base.backPropagate(losses, learningRateMulti);
         }
     }
 
@@ -380,7 +428,7 @@ namespace RLNeuralNetwork
             InputData[] data = read();
             for (int i = 0; i < 1; i++)
             {
-                NeuralNetwork NN = new NeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 55, 0.01), new HiddenLayer(55, 55, 0.01) }, new OutputLayer(55, 1, 0.001));
+                NeuralNetwork NN = new NeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 55, 0.01) }, new OutputLayer(55, 1, 0.001));
                 for (int j = 0; j < 100; j++)
                 {
                     foreach (InputData x in data)
