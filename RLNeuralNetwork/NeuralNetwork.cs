@@ -8,8 +8,8 @@ namespace RLNeuralNetwork
 {
     class NeuralNetwork
     {
-        HiddenLayer[] hiddenLayers;
-        OutputLayer outputLayer;
+        internal HiddenLayer[] hiddenLayers;
+        internal OutputLayer outputLayer;
 
         public NeuralNetwork(HiddenLayer[] hiddenLayers, OutputLayer outputLayer)
         {
@@ -42,7 +42,7 @@ namespace RLNeuralNetwork
         /// <param name="equalInputs">The inputs that each input set has in common.</param>
         /// <param name="uniqueInputs">The set of inputs that are unique to each input set.</param>
         /// <returns></returns>
-        public double[,] optimisedFeedForward(double[] equalInputs, double[,] uniqueInputs)
+        virtual public double[,] optimisedFeedForward(double[] equalInputs, double[,] uniqueInputs)
         {
             if (hiddenLayers.Length == 0)
             {

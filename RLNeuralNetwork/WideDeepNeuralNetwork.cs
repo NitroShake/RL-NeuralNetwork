@@ -6,61 +6,46 @@ using System.Threading.Tasks;
 
 namespace RLNeuralNetwork
 {
-    class WideDeepOutputLayer : OutputLayer
+    internal class WideDeepNeuralNetwork : NeuralNetwork
     {
-        internal double[] wideWeights;
-        internal double[] lastWideInputs;
-        public WideDeepOutputLayer(double[,] weights, double[] wideWeights, double baseLearningRate) : base(weights, baseLearningRate)
-        {
-            this.wideWeights = wideWeights;
-        }
-        public WideDeepOutputLayer(int inputs, int wideInputs, int nodes, double baseLearningRate) : base(inputs, nodes, baseLearningRate)
-        {
-            wideWeights = new double[wideInputs];
-            Random r = new Random();
-            for (int i = 0; i < weights.GetLength(0); i++)
-            {
-                wideWeights[i] = (double)r.NextDouble() * 0.00001;
-            }
-        }
+        public WideDeepNeuralNetwork(HiddenLayer[] hiddenLayers, WideDeepOutputLayer outputLayer) : base(hiddenLayers, outputLayer) { }
 
-        bool feedForwardReady = false;
-        public override double[] feedforward(double[] previousLayer)
+        public double[] wideDeepFeedForward(double[] inputs, double[] wideInputs)
         {
-            if (!feedForwardReady)
+            if (outputLayer is WideDeepOutputLayer)
             {
-                throw new Exception("Use feedforward(previousLayer, wideLayer) instead.");
+                for (int i = 0; i < hiddenLayers.Length; i++)
+                {
+                    inputs = hiddenLayers[i].feedforward(inputs);
+                }
+                return ((WideDeepOutputLayer)outputLayer).feedforward(inputs, wideInputs);
             }
             else
             {
-                return base.feedforward(previousLayer);
+                throw new Exception("Output layer is not a wide-deep output layer");
             }
         }
 
-        public double[] feedforward(double[] previousLayer, double[] wideLayer)
+        public double[,] optimisedFeedForward(double[] equalInputs, double[,] uniqueInputs, double[] wideEqualInputs, double[,] wideUniqueInputs)
         {
-            //NOTE: This implementation only works if the activation function is f(x) = x.
-            feedForwardReady = true;
-            double[] nodes = feedforward(previousLayer);
-            feedForwardReady = false;
-            for (int i = 0; i < nodes.Length; i++)
+            //NOTE: assumes final layer uses linear/identity activation function.
+            double[,] predicts = optimisedFeedForward(equalInputs, uniqueInputs);
+            int baseK = wideEqualInputs.Length;
+            for (int i = 0; i < predicts.GetLength(0); i++)
             {
-                for (int j = 0; j < wideLayer.Length; j++)
+                for (int j = 0; j < predicts.GetLength(1); j++)
                 {
-                    nodes[i] += wideLayer[j] * wideWeights[j];
+                    for (int k = 0; k < wideEqualInputs.Length; k++)
+                    {
+                        predicts[i, j] += wideEqualInputs[k] * ((WideDeepOutputLayer)outputLayer).wideWeights[k];
+                    }
+                    for (int k = 0; k < wideUniqueInputs.Length; k++)
+                    {
+                        predicts[i, j] += wideUniqueInputs[i, k] * ((WideDeepOutputLayer)outputLayer).wideWeights[baseK + k];
+                    }
                 }
             }
-            lastWideInputs = wideLayer;
-            return nodes;
-        }
-
-        internal override void backPropagate(double[] losses, double learningRateMulti)
-        {
-            for (int i = 0; i < losses.Length; i++)
-            {
-                wideWeights[i] = wideWeights[i] - (lastWideInputs[i] * learningRateMulti * losses[i]);
-            }
-            base.backPropagate(losses, learningRateMulti);
+            return predicts;
         }
     }
 }
