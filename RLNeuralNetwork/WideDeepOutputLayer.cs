@@ -8,19 +8,22 @@ namespace RLNeuralNetwork
 {
     class WideDeepOutputLayer : OutputLayer
     {
-        internal double[] wideWeights;
+        internal double[,] wideWeights;
         internal double[] lastWideInputs;
-        public WideDeepOutputLayer(double[,] weights, double[] wideWeights, double baseLearningRate) : base(weights, baseLearningRate)
+        public WideDeepOutputLayer(double[,] weights, double[,] wideWeights, double baseLearningRate) : base(weights, baseLearningRate)
         {
             this.wideWeights = wideWeights;
         }
         public WideDeepOutputLayer(int inputs, int wideInputs, int nodes, double baseLearningRate) : base(inputs, nodes, baseLearningRate)
         {
-            wideWeights = new double[wideInputs];
+            wideWeights = new double[wideInputs, nodes];
             Random r = new Random();
             for (int i = 0; i < weights.GetLength(0); i++)
             {
-                wideWeights[i] = (double)r.NextDouble() * 0.00001;
+                for (int j = 0; j < weights.GetLength(0); j++)
+                {
+                    wideWeights[i, j] = (double)r.NextDouble() * 0.00001;
+                }
             }
         }
 
@@ -47,7 +50,7 @@ namespace RLNeuralNetwork
             {
                 for (int j = 0; j < wideLayer.Length; j++)
                 {
-                    nodes[i] += wideLayer[j] * wideWeights[j];
+                    nodes[i] += wideLayer[j] * wideWeights[j, i];
                 }
             }
             lastWideInputs = wideLayer;
@@ -58,7 +61,10 @@ namespace RLNeuralNetwork
         {
             for (int i = 0; i < losses.Length; i++)
             {
-                wideWeights[i] = wideWeights[i] - (lastWideInputs[i] * learningRateMulti * losses[i]);
+                for (int j = 0; j < wideWeights.GetLength(0); j++)
+                {
+                    wideWeights[j, i] = wideWeights[j, i] - (lastWideInputs[j] * learningRateMulti * losses[i]);
+                }
             }
             base.backPropagate(losses, learningRateMulti);
         }
