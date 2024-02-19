@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace RLNeuralNetwork
 {
@@ -6,10 +8,12 @@ namespace RLNeuralNetwork
     {
         internal double[,] weights;
         internal double[] lastFeedForward;
-        internal double[,] losses;
+        internal double[] losses;
         internal NetworkLayer previousLayer;
         internal double[] previousInputs;
-        public NetworkLayer(int inputs, int nodes)
+        internal bool areLossesValid = false;
+        internal double baseLearningRate;
+        public NetworkLayer(int inputs, int nodes, double baseLearningRate)
         {
             Random r = new Random();
             weights = new double[inputs, nodes];
@@ -17,14 +21,16 @@ namespace RLNeuralNetwork
             {
                 for (int j = 0; j < weights.GetLength(1); j++)
                 {
-                    weights[i, j] = (double)r.NextDouble() * 5;
+                    weights[i, j] = (double)r.NextDouble() * 0.00001;
                 }
             }
+            this.baseLearningRate = baseLearningRate;
         }
-        public NetworkLayer(double[,] weights)
+        public NetworkLayer(double[,] weights, double baseLearningRate)
         {
             previousLayer = null;
             this.weights = weights;
+            this.baseLearningRate = baseLearningRate;
         }
 
         public double[] feedforward(double[] previousLayer)
@@ -36,11 +42,12 @@ namespace RLNeuralNetwork
                 for (int j = 0; j < weights.GetLength(0); j++)
                 {
                     nodes[i] += previousLayer[j] * weights[j, i];
-                    Console.WriteLine($"adding {previousLayer[j]} * {weights[j, i]} to {nodes[i]}");
+                    //.WriteLine($"adding {previousLayer[j]} * {weights[j, i]} to {nodes[i]}");
                 }
                 nodes[i] = activationFunction(nodes[i]);
                 //Console.WriteLine(nodes[i]);
             }
+            previousInputs = previousLayer;
             lastFeedForward = nodes;
             return nodes;
         }
@@ -49,34 +56,52 @@ namespace RLNeuralNetwork
         internal abstract double activationFunction(double x);
 
         internal abstract double activationDerivative(double x);
-        internal virtual void backPropagate()
+        internal virtual void backPropagate(double learningRateMulti = 1)
         {
-            double learningRate = 0.01;
+            double learningRate = learningRateMulti * baseLearningRate;
+            if (!areLossesValid)
+            {
+                throw new InvalidOperationException("Please begin backpropagation using backpropagate(losses) instead.");
+            }
+            areLossesValid = false;
             if (previousLayer != null)
             {
-                previousLayer.losses = new double[previousLayer.weights.GetLength(0), previousLayer.weights.GetLength(1)];
-                for (int i = 0; i < previousLayer.weights.GetLength(0); i++)
+                previousLayer.losses = new double[weights.GetLength(0)];
+                for (int i = 0; i < weights.GetLength(0); i++)
                 {
-                    for (int j = 0; j < previousLayer.weights.GetLength(1); j++)
+                    for (int j = 0; j < weights.GetLength(1); j++)
                     {
-                        previousLayer.losses[i, j] = weights[i, j] * losses[i, j] * activationDerivative(previousLayer.lastFeedForward[i]);
+                        previousLayer.losses[i] += weights[i, j] * losses[j];
                     }
+                    previousLayer.losses[i] *= activationDerivative(previousLayer.lastFeedForward[i]);
                 }
+                previousLayer.areLossesValid = true;
             }
             for (int i = 0; i < weights.GetLength(0); i++)
             {
                 for (int j = 0; j < weights.GetLength(1); j++)
                 {
-                    weights[i, j] = weights[i, j] - (learningRate * previousInputs[i] * losses[i, j]);
+                    weights[i, j] = weights[i, j] - (learningRate * previousInputs[i]  * losses[j]);
                 }
             }
+            if (previousLayer != null)
+            {
+                previousLayer.backPropagate(learningRateMulti: learningRateMulti);
+            }
+        }
+
+        internal virtual void backPropagate(double[] losses, double learningRateMulti)
+        {
+            this.losses = losses;
+            areLossesValid = true;
+            backPropagate(learningRateMulti: learningRateMulti);
         }
     }
 
     class OutputLayer : NetworkLayer
     {
-        public OutputLayer(int inputs, int nodes) : base(inputs, nodes) { }
-        public OutputLayer(double[,] weights) : base(weights) { }
+        public OutputLayer(int inputs, int nodes, double baseLearningRate) : base(inputs, nodes, baseLearningRate) { }
+        public OutputLayer(double[,] weights, double baseLearningRate) : base(weights, baseLearningRate) { }
 
         internal override double activationFunction(double x)
         {
@@ -91,9 +116,9 @@ namespace RLNeuralNetwork
 
     class HiddenLayer : NetworkLayer
     {
-        public HiddenLayer(int inputs, int nodes) : base(inputs, nodes) {   }
+        public HiddenLayer(int inputs, int nodes, double baseLearningRate) : base(inputs, nodes, baseLearningRate) {   }
 
-        public HiddenLayer(double[,] weights) : base(weights) {   }
+        public HiddenLayer(double[,] weights, double baseLearningRate) : base(weights, baseLearningRate) {   }
 
         internal override double activationFunction(double x)
         {
@@ -106,19 +131,14 @@ namespace RLNeuralNetwork
             double y = activationFunction(x);
             return 1 - (y * y);
         }
-
-        internal override void backPropagate()
-        {
-            throw new NotImplementedException();
-        }
     }
 
     class NeuralNetwork
     {
         HiddenLayer[] hiddenLayers;
-        NetworkLayer outputLayer;
+        OutputLayer outputLayer;
 
-        public NeuralNetwork(HiddenLayer[] hiddenLayers, NetworkLayer outputLayer)
+        public NeuralNetwork(HiddenLayer[] hiddenLayers, OutputLayer outputLayer)
         {
             this.hiddenLayers = hiddenLayers;
             for (int i = 1; i < hiddenLayers.Length; i++)
@@ -183,7 +203,7 @@ namespace RLNeuralNetwork
                     for (int k = 0; k < uniqueInputs.GetLength(1); k++)
                     {
                         layerNodes[j] += uniqueInputs[i, k] * layer.weights[k + extraInputWeightIndex, j];
-                        Console.WriteLine($"adding {equalInputs[k]} * {layer.weights[k + extraInputWeightIndex, j]} to {layerNodes[j]}");
+                        //Console.WriteLine($"adding {equalInputs[k]} * {layer.weights[k + extraInputWeightIndex, j]} to {layerNodes[j]}");
                     }
                     layerNodes[j] = layer.activationFunction(layerNodes[j]);
                 }
@@ -204,20 +224,19 @@ namespace RLNeuralNetwork
             return results;
         }
 
-        public void backPropagate(double[] inputs, double[] actualValues)
+        public void backPropagate(double[] inputs, double[] actualValues, double learningRateMulti, bool printLoss = false)
         {
             double[] ff = feedForward(inputs);
-            double[,] losses = new double[ff.Length, 1];
+            double[] losses = new double[ff.Length];
             for (int i = 0; i < losses.Length; i++)
             {
-                losses[i, 0] = ff[i] - actualValues[i];
+                losses[i] = ff[i] - actualValues[i];
             }
-            outputLayer.losses = losses;
-            outputLayer.backPropagate();
-            for (int i = hiddenLayers.Length - 1; i >= 0; i--)
+            if (printLoss)
             {
-                hiddenLayers[i].backPropagate();
+                Console.WriteLine(losses[0]);
             }
+            outputLayer.backPropagate(losses, learningRateMulti);
         }
     }
 
@@ -232,8 +251,8 @@ namespace RLNeuralNetwork
                 this.value = value;
             }
 
-            double[] inputs;
-            double value;
+            public double[] inputs;
+            public double value;
         }
 
         static InputData[] ReadOverwatchResults(string filePath)
@@ -270,7 +289,15 @@ namespace RLNeuralNetwork
                     List<double> inputs = new List<double>();
                     for (int k = 0; k < inputsStrings.Length; k++)
                     {
-                        inputs.Add(double.Parse(inputsStrings[k]));
+                        double input = double.Parse(inputsStrings[k]);
+                        if (k >= 49 && k <= 51)
+                        {
+                            if (input < 0)
+                            {
+                                input = -0.033;
+                            }
+                        }
+                        inputs.Add(input);
                     }
                     double value = double.Parse(valueString);
                     inputDatas.Add(new InputData(inputs.ToArray(), value));
@@ -285,25 +312,107 @@ namespace RLNeuralNetwork
 
         }
 
-        void read()
+        static InputData[] read()
         {
             Console.WriteLine("Enter filepath:");
             string path = Console.ReadLine();
             InputData[] data = ReadOverwatchResults(path);
-            Console.WriteLine("bean");
+            return data;
+        }
+        
+        void test()
+        {
+            List<HiddenLayer> layers = new List<HiddenLayer>();
+            //layers.Add(new HiddenLayer(new double[,] { { 0.3, 0.6, -0.4 }, { 0.8, -0.7, -0.5 } }));
+            layers.Add(new HiddenLayer(new double[,] { { 0.3, 0.8 }, { 0.6, -0.7 }, { -0.4, -0.5 } }, 0.1));
+
+            NeuralNetwork NN = new NeuralNetwork(layers.ToArray(), new OutputLayer(new double[,] { { -0.3 }, { 0.2 } }, 0.01));
+            Console.WriteLine(NN.feedForward(new double[] { 0.36, -1, 0.4 })[0]);
+            NN.backPropagate(new double[] { 0.36, -1, 0.4 }, new double[] { 5 }, 1);
+            Console.WriteLine(NN.optimisedFeedForward(new double[] { 0.36, -1 }, new double[,] { { 0.4 } })[0, 0]);
+
+            for (int i = 0; i < 1000; i++)
+            {
+                //NN.backPropagate(new double[] { 0.36, -1, 0.4 }, new double[] { 5 });
+                //Console.WriteLine(NN.feedForward(new double[] { 0.36, -1, 0.4 })[0]);
+            }
+        }
+
+        void test2()
+        {
+            NeuralNetwork NN = new NeuralNetwork(new HiddenLayer[] { new HiddenLayer(1000, 800, 0.1) }, new OutputLayer(800, 1, 0.01));
+            double[] test = randomDoubleArray(1000);
+            double[] test2 = randomDoubleArray(1000);
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            double result = NN.feedForward(test)[0];
+            sw.Stop();
+            Console.WriteLine(result);
+            for (int i = 0; i < 100; i++)
+            {
+                NN.backPropagate(test, new double[] { 500 }, 1);
+                NN.backPropagate(test2, new double[] { -700 }, 1);
+            }
+            result = NN.feedForward(test)[0];
+            Console.WriteLine(result);
+            result = NN.feedForward(test2)[0];
+            Console.WriteLine(result);
+            Console.WriteLine(sw.ElapsedTicks);
+        }
+
+        static double[] randomDoubleArray(int length)
+        {
+            Random random = new Random();
+            double[] array = new double[length];
+            for (int i = 0; i < length; i++)
+            {
+                array[i] = random.NextDouble() * 0.0005;
+            }
+            return array;
         }
 
         static void Main(string[] args)
         {
-            List<HiddenLayer> layers = new List<HiddenLayer>();
-            //layers.Add(new HiddenLayer(new double[,] { { 0.3, 0.6, -0.4 }, { 0.8, -0.7, -0.5 } }));
-            layers.Add(new HiddenLayer(new double[,] { { 0.3, 0.8 }, { 0.6, -0.7 }, { -0.4, -0.5 } }));
-
-            NeuralNetwork NN = new NeuralNetwork(layers.ToArray(), new OutputLayer(new double[,] { { -0.3 }, { 0.2 } }));
-            Console.WriteLine(NN.feedForward(new double[] { 0.36, -1, 0.4 })[0]);
-            Console.WriteLine(NN.optimisedFeedForward(new double[] { 0.36, -1 }, new double[,] { { 0.4 } })[0,0]);
-            //NN.backPropagate(new double[] { 0.36, -1, 0.4 }, new double[] { 5 });
-            double e = 2;
+            double metaLoss = 0;
+            double metaLossCount = 0;
+            double metaLoss2 = 0;
+            double metaLossCount2 = 0;
+            InputData[] data = read();
+            for (int i = 0; i < 1; i++)
+            {
+                NeuralNetwork NN = new NeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 55, 0.01), new HiddenLayer(55, 55, 0.01) }, new OutputLayer(55, 1, 0.001));
+                for (int j = 0; j < 100; j++)
+                {
+                    foreach (InputData x in data)
+                    {
+                        NN.backPropagate(x.inputs, new double[] { x.value }, 1 / ((i*5)+1), printLoss: false);
+                    }
+                }
+                double loss = 0;
+                int lossCount = 0;
+                double loss2 = 0;
+                int lossCount2 = 0;
+                foreach (InputData x in data)
+                {
+                    if (x.inputs[49] == 0.1 || x.inputs[50] == 0.1 || x.inputs[51] == 0.1)
+                    {
+                        loss2 += Math.Abs(x.value - NN.feedForward(x.inputs)[0]);
+                        lossCount2++;
+                    } else
+                    {
+                        loss += Math.Abs(x.value - NN.feedForward(x.inputs)[0]);
+                        lossCount++;
+                    }
+                }
+                metaLoss += loss / lossCount;
+                metaLossCount++;
+                metaLoss2 += loss2 / lossCount2;
+                metaLossCount2++;
+            }
+            Console.WriteLine(metaLoss / metaLossCount);
+            Console.WriteLine(metaLoss2 / metaLossCount2);
+            Console.WriteLine((metaLoss + metaLoss2) / (metaLossCount + metaLossCount2));
+            Console.WriteLine("ee");
         }
     }
 }
