@@ -39,7 +39,7 @@ namespace RLNeuralNetwork
                     {
                         predicts[i, j] += wideEqualInputs[k] * ((WideDeepOutputLayer)outputLayer).wideWeights[k];
                     }
-                    for (int k = 0; k < wideUniqueInputs.Length; k++)
+                    for (int k = 0; k < wideUniqueInputs.GetLength(1); k++)
                     {
                         predicts[i, j] += wideUniqueInputs[i, k] * ((WideDeepOutputLayer)outputLayer).wideWeights[baseK + k];
                     }
