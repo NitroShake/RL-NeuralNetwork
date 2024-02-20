@@ -58,7 +58,7 @@ namespace RLNeuralNetwork
                         {
                             if (input < 0)
                             {
-                                //input = 0;
+                                input = -0;
                             }
                         }
                         inputs.Add(input);
@@ -124,18 +124,16 @@ namespace RLNeuralNetwork
             Console.WriteLine(sw.ElapsedTicks);
         }
 
-        static void testLoss()
+        static void testLoss(InputData[] data)
         {
             double metaLoss = 0;
             double metaLossCount = 0;
             double metaLoss2 = 0;
             double metaLossCount2 = 0;
-            InputData[] data = read();
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 5; i++)
             {
-                NeuralNetwork NN = new NeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 55, 0.01) }, new OutputLayer(55, 1, 0.001));
-                WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 55, 0.01) }, new WideDeepOutputLayer(55, 55, 1, 0.001, 0.001));
-                for (int j = 0; j < 100; j++)
+                NeuralNetwork NN = new NeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 50, 0.0001), new HiddenLayer(50, 40, 0.0001) }, new OutputLayer(40, 1, 0.0001));
+                for (int j = 0; j < 50; j++)
                 {
                     foreach (InputData x in data)
                     {
@@ -183,21 +181,23 @@ namespace RLNeuralNetwork
 
         static void Main(string[] args)
         {
-            testLoss();
+            Console.WriteLine("Enter filepath:");
+            string path = Console.ReadLine();
+            InputData[] data = ReadOverwatchResults(path);
+            testLoss(data);
             Console.WriteLine("-------------------");
             double metaLoss = 0;
             double metaLossCount = 0;
             double metaLoss2 = 0;
             double metaLossCount2 = 0;
-            InputData[] data = read();
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 5; i++)
             {
-                WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 55, 0.01) }, new WideDeepOutputLayer(55, 55, 1, 0.001, 0.001));
-                for (int j = 0; j < 100; j++)
+                WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 50, 0.0001), new HiddenLayer(50, 40, 0.0001) }, new WideDeepOutputLayer(40, 55, 1, 0.00001, 0.00001));
+                for (int j = 0; j < 50; j++)
                 {
                     foreach (InputData x in data)
                     {
-                        WDNN.backPropagate(x.inputs, x.inputs, new double[] { x.value }, 1 / ((i * 5) + 1));
+                        WDNN.backPropagate(x.inputs, x.inputs, new double[] { x.value }, 1 / ((i * 10) + 1));
                     }
                 }
                 double loss = 0;
