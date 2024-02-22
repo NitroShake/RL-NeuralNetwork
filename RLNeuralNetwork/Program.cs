@@ -71,9 +71,56 @@ namespace RLNeuralNetwork
             return inputDatas.ToArray();
         }
 
-        void ToOverwatchArray()
+        static void ToOverwatchArray(double[,] w1, double[] w2, double[] wideW)
         {
+            StreamWriter sw = new("export.txt");
+            sw.WriteLine("actions");
+            sw.WriteLine("{");
+            string weights = "\tw1Import1 = Array(";
+            int import1length = (int)(w1.GetLength(0) / 1.5);
+            for (int i = 0; i < import1length; i++)
+            {
+                weights += "Array(";
+                for (int j = 0; j < w1.GetLength(1); j++)
+                {
+                    weights += j != w1.GetLength(1) - 1 ? w1[i, j] + ", " : w1[i, j];
+                }
+                weights += i != w1.GetLength(0) - 1 ? "), " : "));";
+            }
+            sw.WriteLine(weights);
 
+            sw.WriteLine("}");
+            sw.WriteLine("actions");
+            sw.WriteLine("{");
+
+            weights = "\tw1Import2 = Array(";
+            for (int i = import1length; i < w1.GetLength(0); i++)
+            {
+                weights += "Array(";
+                for (int j = 0; j < w1.GetLength(1); j++)
+                {
+                    weights += j != w1.GetLength(1) - 1 ? w1[i, j] + ", " : w1[i, j];
+                }
+                weights += i != w1.GetLength(0) - 1 ? "), " : "));";
+            }
+            sw.WriteLine(weights);
+
+            weights = "\tw2Import = Array(";
+            for (int i = 0; i < w2.Length; i++)
+            {
+                weights += i != w2.Length - 1 ? w2[i] + ", " : w2[i] + ");";
+            }
+            sw.WriteLine(weights);
+
+            weights = "\twideWeightImport = Array(";
+            for (int i = 0; i < wideW.Length; i++)
+            {
+                weights += i != wideW.Length - 1 ? wideW[i] + ", " : wideW[i] + ");";
+            }
+            sw.WriteLine(weights);
+
+            sw.WriteLine("}");
+            sw.Close();
         }
 
         static InputData[] read()
@@ -181,6 +228,7 @@ namespace RLNeuralNetwork
 
         static void Main(string[] args)
         {
+            ToOverwatchArray(new double[,] { { 5,3,4,3,3}, { 2,1,2,2,21}, {3,3,3,3,4 } }, new double[] { 99,88,77,66,55 }, new double[] {11,22,33,44,55,66} );
             Console.WriteLine("Enter filepath:");
             string path = Console.ReadLine();
             InputData[] data = ReadOverwatchResults(path);
