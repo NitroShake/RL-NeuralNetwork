@@ -14,12 +14,14 @@ namespace RLNeuralNetwork
 
         internal override double activationFunction(double x)
         {
+            //return x;
             double e2x = Math.Pow(Math.E, 2 * x);
             return (e2x - 1) / (e2x + 1);
         }
 
         internal override double activationDerivative(double x)
         {
+            //return 1;
             double y = activationFunction(x);
             return 1 - (y * y);
         }

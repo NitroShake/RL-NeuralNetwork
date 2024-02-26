@@ -25,7 +25,7 @@ namespace RLNeuralNetwork
             {
                 for (int j = 0; j < wideWeights.GetLength(1); j++)
                 {
-                    wideWeights[i, j] = (double)r.NextDouble() * 0.00001;
+                    wideWeights[i, j] = (double)r.NextDouble() * 0.000000001;
                 }
             }
         }

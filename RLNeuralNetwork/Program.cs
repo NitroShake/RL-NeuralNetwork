@@ -58,8 +58,9 @@ namespace RLNeuralNetwork
                         {
                             if (input < 0)
                             {
-                                input = -0;
+                                input = -0.1;
                             }
+                            //input *= 10;
                         }
                         inputs.Add(input);
                     }
@@ -130,14 +131,14 @@ namespace RLNeuralNetwork
             double metaLossCount = 0;
             double metaLoss2 = 0;
             double metaLossCount2 = 0;
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 10; i++)
             {
-                NeuralNetwork NN = new NeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 50, 0.0001), new HiddenLayer(50, 40, 0.0001) }, new OutputLayer(40, 1, 0.0001));
-                for (int j = 0; j < 50; j++)
+                NeuralNetwork NN = new NeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 55, 0.01) }, new OutputLayer(55, 1, 0.01));
+                for (int j = 1; j <= 2; j++)
                 {
                     foreach (InputData x in data)
                     {
-                        NN.backPropagate(x.inputs, new double[] { x.value }, 1 / ((i * 10) + 1));
+                        NN.backPropagate(x.inputs, new double[] { x.value }, 1 / ((j)));
                     }
                 }
                 double loss = 0;
@@ -146,7 +147,7 @@ namespace RLNeuralNetwork
                 int lossCount2 = 0;
                 foreach (InputData x in data)
                 {
-                    if (x.inputs[49] == 0.1 || x.inputs[50] == 0.1 || x.inputs[51] == 0.1)
+                    if (x.inputs[49] >= 0.01 || x.inputs[50] >= 0.01 || x.inputs[51] >= 0.01)
                     {
                         loss2 += Math.Abs(x.value - NN.feedForward(x.inputs)[0]);
                         lossCount2++;
@@ -184,36 +185,48 @@ namespace RLNeuralNetwork
             Console.WriteLine("Enter filepath:");
             string path = Console.ReadLine();
             InputData[] data = ReadOverwatchResults(path);
+            InputData[] wideData = data;
+            for (int i = 49; i <= 51; i++)
+            {
+                for (int j = 0; j < wideData.Length; j++)
+                {
+                    if (wideData[j].inputs[i] < 0)
+                    {
+                        //wideData[j].inputs[i] = 0;
+                    }
+                }
+            }
             testLoss(data);
             Console.WriteLine("-------------------");
             double metaLoss = 0;
             double metaLossCount = 0;
             double metaLoss2 = 0;
             double metaLossCount2 = 0;
-            for (int i = 0; i < 5; i++)
+            WideDeepNeuralNetwork s;
+            for (int i = 0; i < 10; i++)
             {
-                WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 50, 0.0001), new HiddenLayer(50, 40, 0.0001) }, new WideDeepOutputLayer(40, 55, 1, 0.00001, 0.00001));
-                for (int j = 0; j < 50; j++)
+                WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 55, 0.01) }, new WideDeepOutputLayer(55, 55, 1, 0.001, 0.00000000001));
+                for (int j = 1; j <= 2; j++)
                 {
-                    foreach (InputData x in data)
+                    for (int k = 0; k < data.Length; k++)
                     {
-                        WDNN.backPropagate(x.inputs, x.inputs, new double[] { x.value }, 1 / ((i * 10) + 1));
+                        WDNN.backPropagate(data[k].inputs, wideData[k].inputs, new double[] { data[k].value }, 1 / ((j)));
                     }
                 }
                 double loss = 0;
                 int lossCount = 0;
                 double loss2 = 0;
                 int lossCount2 = 0;
-                foreach (InputData x in data)
+                for (int k = 0; k < data.Length; k++)
                 {
-                    if (x.inputs[49] == 0.1 || x.inputs[50] == 0.1 || x.inputs[51] == 0.1)
+                    if (data[k].inputs[49] >= 0.01 || data[k].inputs[50] >= 0.01 || data[k].inputs[51] >= 0.01)
                     {
-                        loss2 += Math.Abs(x.value - WDNN.wideDeepFeedForward(x.inputs, x.inputs)[0]);
+                        loss2 += Math.Abs(data[k].value - WDNN.wideDeepFeedForward(data[k].inputs, wideData[k].inputs)[0]);
                         lossCount2++;
                     }
                     else
                     {
-                        loss += Math.Abs(x.value - WDNN.wideDeepFeedForward(x.inputs, x.inputs)[0]);
+                        loss += Math.Abs(data[k].value - WDNN.wideDeepFeedForward(data[k].inputs, wideData[k].inputs)[0]);
                         lossCount++;
                     }
                 }
@@ -221,11 +234,12 @@ namespace RLNeuralNetwork
                 metaLossCount++;
                 metaLoss2 += loss2 / lossCount2;
                 metaLossCount2++;
+                s = WDNN;
             }
             Console.WriteLine(metaLoss / metaLossCount);
             Console.WriteLine(metaLoss2 / metaLossCount2);
             Console.WriteLine((metaLoss + metaLoss2) / (metaLossCount + metaLossCount2));
-            Console.WriteLine("ee");
+            Console.WriteLine("ee"); //literally just for breakpoints
         }
     }
 }
