@@ -75,6 +75,7 @@ namespace RLNeuralNetwork
 
         static void ExportAsOverwatchArray(double[,] w1, double[] w2, double[] wideW)
         {
+            const int dp = 5;
             StreamWriter sw = new("export.txt");
             sw.WriteLine("actions");
             sw.WriteLine("{");
@@ -85,9 +86,9 @@ namespace RLNeuralNetwork
                 weights += "Array(";
                 for (int j = 0; j < w1.GetLength(1); j++)
                 {
-                    weights += j != w1.GetLength(1) - 1 ? w1[i, j] + ", " : w1[i, j];
+                    weights += j != w1.GetLength(1) - 1 ? Math.Round(w1[i, j], dp) + ", " : Math.Round(w1[i, j], dp);
                 }
-                weights += i != w1.GetLength(0) - 1 ? "), " : "));";
+                weights += i != import1length - 1 ? "), " : "));";
             }
             sw.WriteLine(weights);
 
@@ -101,7 +102,7 @@ namespace RLNeuralNetwork
                 weights += "Array(";
                 for (int j = 0; j < w1.GetLength(1); j++)
                 {
-                    weights += j != w1.GetLength(1) - 1 ? Math.Round(w1[i, j],5) + ", " : Math.Round(w1[i, j], 5);
+                    weights += j != w1.GetLength(1) - 1 ? Math.Round(w1[i, j], dp) + ", " : Math.Round(w1[i, j], dp);
                 }
                 weights += i != w1.GetLength(0) - 1 ? "), " : "));";
             }
@@ -110,14 +111,14 @@ namespace RLNeuralNetwork
             weights = "\tw2Import = Array(";
             for (int i = 0; i < w2.Length; i++)
             {
-                weights += i != w2.Length - 1 ? Math.Round(w2[i], 5) + ", " : Math.Round(w2[i], 5) + ");";
+                weights += i != w2.Length - 1 ? Math.Round(w2[i], dp) + ", " : Math.Round(w2[i], dp) + ");";
             }
             sw.WriteLine(weights);
 
             weights = "\twideWeightImport = Array(";
             for (int i = 0; i < wideW.Length; i++)
             {
-                weights += i != wideW.Length - 1 ? Math.Round(wideW[i], 5) + ", " : Math.Round(wideW[i], 5) + ");";
+                weights += i != wideW.Length - 1 ? Math.Round(wideW[i], dp) + ", " : Math.Round(wideW[i], dp) + ");";
             }
             sw.WriteLine(weights);
 
@@ -309,8 +310,8 @@ namespace RLNeuralNetwork
                     }
                 }
             }
-            testLoss(data, wideData);
-            //createOWArray(data, wideData);
+            //testLoss(data, wideData);
+            createOWArray(data, wideData);
         }
     }
 }
