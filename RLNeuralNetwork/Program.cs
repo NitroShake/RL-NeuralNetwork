@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace RLNeuralNetwork
@@ -72,7 +73,7 @@ namespace RLNeuralNetwork
             return inputDatas.ToArray();
         }
 
-        static void ToOverwatchArray(double[,] w1, double[] w2, double[] wideW)
+        static void ExportAsOverwatchArray(double[,] w1, double[] w2, double[] wideW)
         {
             StreamWriter sw = new("export.txt");
             sw.WriteLine("actions");
@@ -100,7 +101,7 @@ namespace RLNeuralNetwork
                 weights += "Array(";
                 for (int j = 0; j < w1.GetLength(1); j++)
                 {
-                    weights += j != w1.GetLength(1) - 1 ? w1[i, j] + ", " : w1[i, j];
+                    weights += j != w1.GetLength(1) - 1 ? Math.Round(w1[i, j],5) + ", " : Math.Round(w1[i, j], 5);
                 }
                 weights += i != w1.GetLength(0) - 1 ? "), " : "));";
             }
@@ -109,19 +110,20 @@ namespace RLNeuralNetwork
             weights = "\tw2Import = Array(";
             for (int i = 0; i < w2.Length; i++)
             {
-                weights += i != w2.Length - 1 ? w2[i] + ", " : w2[i] + ");";
+                weights += i != w2.Length - 1 ? Math.Round(w2[i], 5) + ", " : Math.Round(w2[i], 5) + ");";
             }
             sw.WriteLine(weights);
 
             weights = "\twideWeightImport = Array(";
             for (int i = 0; i < wideW.Length; i++)
             {
-                weights += i != wideW.Length - 1 ? wideW[i] + ", " : wideW[i] + ");";
+                weights += i != wideW.Length - 1 ? Math.Round(wideW[i], 5) + ", " : Math.Round(wideW[i], 5) + ");";
             }
             sw.WriteLine(weights);
 
             sw.WriteLine("}");
             sw.Close();
+            Console.WriteLine("weights exported");
         }
 
         static InputData[] read()
@@ -172,7 +174,7 @@ namespace RLNeuralNetwork
             Console.WriteLine(sw.ElapsedTicks);
         }
 
-        static void testLoss(InputData[] data)
+        static void testLoss(InputData[] data, InputData[] wideData)
         {
             double metaLoss = 0;
             double metaLossCount = 0;
@@ -214,46 +216,15 @@ namespace RLNeuralNetwork
             Console.WriteLine(metaLoss2 / metaLossCount2);
             Console.WriteLine((metaLoss + metaLoss2) / (metaLossCount + metaLossCount2));
             Console.WriteLine("ee");
-        }
-
-        static double[] randomDoubleArray(int length)
-        {
-            Random random = new Random();
-            double[] array = new double[length];
-            for (int i = 0; i < length; i++)
-            {
-                array[i] = random.NextDouble() * 0.0005;
-            }
-            return array;
-        }
-
-        static void Main(string[] args)
-        {
-            ToOverwatchArray(new double[,] { { 5,3,4,3,3}, { 2,1,2,2,21}, {3,3,3,3,4 } }, new double[] { 99,88,77,66,55 }, new double[] {11,22,33,44,55,66} );
-            Console.WriteLine("Enter filepath:");
-            string path = Console.ReadLine();
-            InputData[] data = ReadOverwatchResults(path);
-            InputData[] wideData = data;
-            for (int i = 49; i <= 51; i++)
-            {
-                for (int j = 0; j < wideData.Length; j++)
-                {
-                    if (wideData[j].inputs[i] < 0)
-                    {
-                        //wideData[j].inputs[i] = 0;
-                    }
-                }
-            }
-            testLoss(data);
             Console.WriteLine("-------------------");
-            double metaLoss = 0;
-            double metaLossCount = 0;
-            double metaLoss2 = 0;
-            double metaLossCount2 = 0;
+            metaLoss = 0;
+            metaLossCount = 0;
+            metaLoss2 = 0;
+            metaLossCount2 = 0;
             WideDeepNeuralNetwork s;
             for (int i = 0; i < 10; i++)
             {
-                WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 55, 0.01) }, new WideDeepOutputLayer(55, 55, 1, 0.001, 0.00000000001));
+                WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 55, 0.01) }, new WideDeepOutputLayer(55, 55, 1, 0.001, 0.00001));
                 for (int j = 1; j <= 2; j++)
                 {
                     for (int k = 0; k < data.Length; k++)
@@ -288,6 +259,58 @@ namespace RLNeuralNetwork
             Console.WriteLine(metaLoss2 / metaLossCount2);
             Console.WriteLine((metaLoss + metaLoss2) / (metaLossCount + metaLossCount2));
             Console.WriteLine("ee"); //literally just for breakpoints
+        }
+
+        static void createOWArray(InputData[] data, InputData[] wideData)
+        {
+            WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 55, 0.01) }, new WideDeepOutputLayer(55, 55, 1, 0.001, 0.00001));
+            for (int i = 1; i <= 2; i++)
+            {
+                for (int j = 0; j < data.Length; j++)
+                {
+                    WDNN.backPropagate(data[j].inputs, wideData[j].inputs, new double[] { data[j].value }, 1 / ((i)));
+                }
+            }
+            double[] w1 = new double[WDNN.outputLayer.weights.GetLength(0)];
+            double[] ww = new double[WDNN.outputLayer.weights.GetLength(0)];
+            for (int i = 0; i < WDNN.outputLayer.weights.GetLength(0); i++)
+            {
+                w1[i] = WDNN.outputLayer.weights[i, 0];
+                ww[i] = ((WideDeepOutputLayer)WDNN.outputLayer).wideWeights[i, 0];
+            }
+
+            ExportAsOverwatchArray(WDNN.hiddenLayers[0].weights, w1, ww);
+        }
+
+        static double[] randomDoubleArray(int length)
+        {
+            Random random = new Random();
+            double[] array = new double[length];
+            for (int i = 0; i < length; i++)
+            {
+                array[i] = random.NextDouble() * 0.0005;
+            }
+            return array;
+        }
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Enter filepath:");
+            string path = Console.ReadLine();
+            InputData[] data = ReadOverwatchResults(path);
+            InputData[] wideData = data;
+            for (int i = 49; i <= 51; i++)
+            {
+                for (int j = 0; j < wideData.Length; j++)
+                {
+                    if (wideData[j].inputs[i] < 0)
+                    {
+                        //wideData[j].inputs[i] = 0;
+                    }
+                }
+            }
+            testLoss(data, wideData);
+            //createOWArray(data, wideData);
         }
     }
 }
