@@ -1,0 +1,10 @@
+actions
+{
+	w1Import1 = Array(Array(5, 3, 4, 3, 3), Array(2, 1, 2, 2, 21), 
+}
+actions
+{
+	w1Import2 = Array(Array(3, 3, 3, 3, 4));
+	w2Import = Array(99, 88, 77, 66, 55);
+	wideWeightImport = Array(11, 22, 33, 44, 55, 66);
+}
