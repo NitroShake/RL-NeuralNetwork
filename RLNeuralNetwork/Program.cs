@@ -79,7 +79,7 @@ namespace RLNeuralNetwork
             StreamWriter sw = new("export.txt");
             sw.WriteLine("actions");
             sw.WriteLine("{");
-            string weights = "\tw1Import1 = Array(";
+            string weights = "\tGlobal.w1Import1 = Array(";
             int import1length = (int)(w1.GetLength(0) / 1.5);
             for (int i = 0; i < import1length; i++)
             {
@@ -96,7 +96,7 @@ namespace RLNeuralNetwork
             sw.WriteLine("actions");
             sw.WriteLine("{");
 
-            weights = "\tw1Import2 = Array(";
+            weights = "\tGlobal.w1Import2 = Array(";
             for (int i = import1length; i < w1.GetLength(0); i++)
             {
                 weights += "Array(";
@@ -108,14 +108,14 @@ namespace RLNeuralNetwork
             }
             sw.WriteLine(weights);
 
-            weights = "\tw2Import = Array(";
+            weights = "\tGlobal.w2Import = Array(";
             for (int i = 0; i < w2.Length; i++)
             {
                 weights += i != w2.Length - 1 ? Math.Round(w2[i], dp) + ", " : Math.Round(w2[i], dp) + ");";
             }
             sw.WriteLine(weights);
 
-            weights = "\twideWeightImport = Array(";
+            weights = "\tGlobal.wideWeightImport = Array(";
             for (int i = 0; i < wideW.Length; i++)
             {
                 weights += i != wideW.Length - 1 ? Math.Round(wideW[i], dp) + ", " : Math.Round(wideW[i], dp) + ");";
