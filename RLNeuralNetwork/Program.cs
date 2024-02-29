@@ -264,7 +264,7 @@ namespace RLNeuralNetwork
 
         static void createOWArray(InputData[] data, InputData[] wideData)
         {
-            WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 55, 0.01) }, new WideDeepOutputLayer(55, 55, 1, 0.001, 0.00001));
+            WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 31, 0.01) }, new WideDeepOutputLayer(31, 55, 1, 0.001, 0.00001));
             for (int i = 1; i <= 2; i++)
             {
                 for (int j = 0; j < data.Length; j++)
