@@ -281,6 +281,28 @@ namespace RLNeuralNetwork
             }
 
             ExportAsOverwatchArray(WDNN.hiddenLayers[0].weights, w1, ww);
+
+            double loss = 0;
+            int lossCount = 0;
+            double loss2 = 0;
+            int lossCount2 = 0;
+            for (int k = 0; k < data.Length; k++)
+            {
+                if (data[k].inputs[49] >= 0.01 || data[k].inputs[50] >= 0.01 || data[k].inputs[51] >= 0.01)
+                {
+                    loss2 += Math.Abs(data[k].value - WDNN.wideDeepFeedForward(data[k].inputs, wideData[k].inputs)[0]);
+                    lossCount2++;
+                }
+                else
+                {
+                    loss += Math.Abs(data[k].value - WDNN.wideDeepFeedForward(data[k].inputs, wideData[k].inputs)[0]);
+                    lossCount++;
+                }
+            }
+            Console.WriteLine(loss / lossCount);
+            Console.WriteLine(loss2 / lossCount2);
+            Console.WriteLine((loss + loss2) / (lossCount + lossCount2));
+
         }
 
         static double[] randomDoubleArray(int length)
