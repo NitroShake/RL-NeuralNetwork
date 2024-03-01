@@ -75,7 +75,7 @@ namespace RLNeuralNetwork
 
         static void ExportAsOverwatchArray(double[,] w1, double[] w2, double[] wideW)
         {
-            const int dp = 5;
+            const int dp = 6;
             StreamWriter sw = new("export.txt");
             sw.WriteLine("actions");
             sw.WriteLine("{");
@@ -302,7 +302,17 @@ namespace RLNeuralNetwork
             Console.WriteLine(loss / lossCount);
             Console.WriteLine(loss2 / lossCount2);
             Console.WriteLine((loss + loss2) / (lossCount + lossCount2));
+        }
 
+        static void overwatchParityTest()
+        {
+            HiddenLayer hl = new HiddenLayer(new double[,] { { 0.2, 0.3, 0.1 }, { -0.4, -0.2, -0.1 }, { 0.3, -0.4, -0.2 }, { -0.1, 0.1, 0.3 }, { 0.7, 0.8, 0.6 } }, 0.01);
+            WideDeepOutputLayer ol = new WideDeepOutputLayer(new double[,] { { 3 }, { 4 }, {-5 }  }, new double[,] { { -3.2 }, { 2 }, { 4 }, { -1 }, { 2 } }, 0.01, 0.01);
+            WideDeepNeuralNetwork wdnn = new WideDeepNeuralNetwork(new HiddenLayer[] { hl }, ol);
+            double[] inputs = new double[] { -2, 1, 0.25, 1, 2 };
+            Console.WriteLine(wdnn.wideDeepFeedForward(inputs, inputs)[0]);
+            wdnn.backPropagate(inputs, inputs, new double[] { -5 }, 1);
+            Console.WriteLine(wdnn.wideDeepFeedForward(inputs, inputs)[0]);
         }
 
         static double[] randomDoubleArray(int length)
@@ -332,8 +342,10 @@ namespace RLNeuralNetwork
                     }
                 }
             }
-            //testLoss(data, wideData);
-            createOWArray(data, wideData);
+            testLoss(data, wideData);
+            //createOWArray(data, wideData);
+            //overwatchParityTest();
+
         }
     }
 }

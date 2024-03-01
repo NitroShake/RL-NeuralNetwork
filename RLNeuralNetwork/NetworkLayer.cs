@@ -23,7 +23,7 @@ namespace RLNeuralNetwork
             {
                 for (int j = 0; j < weights.GetLength(1); j++)
                 {
-                    weights[i, j] = (double)r.NextDouble() * 0.0005;
+                    weights[i, j] = (double)r.NextDouble() * 0.000005;
                 }
             }
             this.baseLearningRate = baseLearningRate;
