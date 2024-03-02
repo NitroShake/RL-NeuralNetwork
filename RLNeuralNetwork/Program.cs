@@ -273,10 +273,13 @@ namespace RLNeuralNetwork
                 }
             }
             double[] w1 = new double[WDNN.outputLayer.weights.GetLength(0)];
-            double[] ww = new double[WDNN.outputLayer.weights.GetLength(0)];
             for (int i = 0; i < WDNN.outputLayer.weights.GetLength(0); i++)
             {
                 w1[i] = WDNN.outputLayer.weights[i, 0];
+            }
+            double[] ww = new double[wideData[0].inputs.Length];
+            for (int i = 0; i < ww.Length; i++)
+            {
                 ww[i] = ((WideDeepOutputLayer)WDNN.outputLayer).wideWeights[i, 0];
             }
 
