@@ -75,7 +75,7 @@ namespace RLNeuralNetwork
 
         static void ExportAsOverwatchArray(double[,] w1, double[] w2, double[] wideW)
         {
-            const int dp = 6;
+            const int dp = 7;
             StreamWriter sw = new("export.txt");
             sw.WriteLine("actions");
             sw.WriteLine("{");
@@ -155,7 +155,7 @@ namespace RLNeuralNetwork
 
         void test2()
         {
-            NeuralNetwork NN = new NeuralNetwork(new HiddenLayer[] { new HiddenLayer(1000, 800, 0.1) }, new OutputLayer(800, 1, 0.01));
+            NeuralNetwork NN = new NeuralNetwork(new HiddenLayer[] { new HiddenLayer(1000, 800, 0.1, 0.1) }, new OutputLayer(800, 1, 0.01, 0.1));
             double[] test = randomDoubleArray(1000);
             double[] test2 = randomDoubleArray(1000);
             Stopwatch sw = new Stopwatch();
@@ -183,7 +183,7 @@ namespace RLNeuralNetwork
             double metaLossCount2 = 0;
             for (int i = 0; i < 10; i++)
             {
-                NeuralNetwork NN = new NeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 55, 0.01) }, new OutputLayer(55, 1, 0.01));
+                NeuralNetwork NN = new NeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 55, 0.01, 0.00005) }, new OutputLayer(55, 1, 0.01, 0.00001));
                 for (int j = 1; j <= 2; j++)
                 {
                     foreach (InputData x in data)
@@ -225,7 +225,7 @@ namespace RLNeuralNetwork
             WideDeepNeuralNetwork s;
             for (int i = 0; i < 10; i++)
             {
-                WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 55, 0.01) }, new WideDeepOutputLayer(55, 55, 1, 0.001, 0.00001));
+                WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 55, 0.01, 0.00005) }, new WideDeepOutputLayer(55, 55, 1, 0.001, 0.00001, 0.00001));
                 for (int j = 1; j <= 2; j++)
                 {
                     for (int k = 0; k < data.Length; k++)
@@ -264,7 +264,7 @@ namespace RLNeuralNetwork
 
         static void createOWArray(InputData[] data, InputData[] wideData)
         {
-            WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 31, 0.01) }, new WideDeepOutputLayer(31, 55, 1, 0.001, 0.00001));
+            WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 31, 0.01, 0.5) }, new WideDeepOutputLayer(31, 55, 1, 0.001, 0.00001, 0.1));
             for (int i = 1; i <= 2; i++)
             {
                 for (int j = 0; j < data.Length; j++)
@@ -342,8 +342,8 @@ namespace RLNeuralNetwork
                     }
                 }
             }
-            testLoss(data, wideData);
-            //createOWArray(data, wideData);
+            //testLoss(data, wideData);
+            createOWArray(data, wideData);
             //overwatchParityTest();
 
         }

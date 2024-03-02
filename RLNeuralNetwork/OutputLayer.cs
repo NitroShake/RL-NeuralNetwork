@@ -8,7 +8,7 @@ namespace RLNeuralNetwork
 {
     class OutputLayer : NetworkLayer
     {
-        public OutputLayer(int inputs, int nodes, double baseLearningRate) : base(inputs, nodes, baseLearningRate) { }
+        public OutputLayer(int inputs, int nodes, double baseLearningRate, double baseWeightMulti) : base(inputs, nodes, baseLearningRate, baseWeightMulti) { }
         public OutputLayer(double[,] weights, double baseLearningRate) : base(weights, baseLearningRate) { }
 
         internal override double activationFunction(double x)

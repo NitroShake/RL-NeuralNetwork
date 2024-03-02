@@ -16,7 +16,7 @@ namespace RLNeuralNetwork
             this.wideWeights = wideWeights;
             this.wideWeightBaseLearningRate = wideWeightBaseLearningRate;
         }
-        public WideDeepOutputLayer(int inputs, int wideInputs, int nodes, double baseLearningRate, double wideWeightBaseLearningRate) : base(inputs, nodes, baseLearningRate)
+        public WideDeepOutputLayer(int inputs, int wideInputs, int nodes, double baseLearningRate, double wideWeightBaseLearningRate, double baseWeightMulti) : base(inputs, nodes, baseLearningRate, baseWeightMulti)
         {
             this.wideWeightBaseLearningRate = wideWeightBaseLearningRate;
             wideWeights = new double[wideInputs, nodes];
@@ -25,7 +25,7 @@ namespace RLNeuralNetwork
             {
                 for (int j = 0; j < wideWeights.GetLength(1); j++)
                 {
-                    wideWeights[i, j] = (double)r.NextDouble() * 0.000001;
+                    wideWeights[i, j] = (double)r.NextDouble() * baseWeightMulti;
                 }
             }
         }

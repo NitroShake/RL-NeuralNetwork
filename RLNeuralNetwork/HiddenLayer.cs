@@ -8,7 +8,7 @@ namespace RLNeuralNetwork
 {
     class HiddenLayer : NetworkLayer
     {
-        public HiddenLayer(int inputs, int nodes, double baseLearningRate) : base(inputs, nodes, baseLearningRate) { }
+        public HiddenLayer(int inputs, int nodes, double baseLearningRate, double baseWeightMulti) : base(inputs, nodes, baseLearningRate, baseWeightMulti) { }
 
         public HiddenLayer(double[,] weights, double baseLearningRate) : base(weights, baseLearningRate) { }
 

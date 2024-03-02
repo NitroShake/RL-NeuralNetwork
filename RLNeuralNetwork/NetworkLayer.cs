@@ -15,7 +15,7 @@ namespace RLNeuralNetwork
         internal double[] previousInputs;
         internal bool areLossesValid = false;
         internal double baseLearningRate;
-        public NetworkLayer(int inputs, int nodes, double baseLearningRate)
+        public NetworkLayer(int inputs, int nodes, double baseLearningRate, double baseWeightMulti)
         {
             Random r = new Random();
             weights = new double[inputs, nodes];
@@ -23,7 +23,7 @@ namespace RLNeuralNetwork
             {
                 for (int j = 0; j < weights.GetLength(1); j++)
                 {
-                    weights[i, j] = (double)r.NextDouble() * 0.000005;
+                    weights[i, j] = (double)r.NextDouble() * baseWeightMulti;
                 }
             }
             this.baseLearningRate = baseLearningRate;
