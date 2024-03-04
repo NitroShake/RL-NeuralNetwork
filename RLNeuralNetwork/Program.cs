@@ -345,8 +345,8 @@ namespace RLNeuralNetwork
                     }
                 }
             }
-            //testLoss(data, wideData);
-            createOWArray(data, wideData);
+            testLoss(data, wideData);
+            //createOWArray(data, wideData);
             //overwatchParityTest();
 
         }
