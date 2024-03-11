@@ -10,15 +10,16 @@ namespace RLNeuralNetwork
 
         internal struct InputData
         {
-            public InputData(double[] inputs, double value)
+            public InputData(double[] inputs, double[] values)
             {
                 this.inputs = inputs;
-                this.value = value;
+                this.values = values;
             }
 
             public double[] inputs;
-            public double value;
+            public double[] values;
         }
+
 
         static InputData[] ReadOverwatchResults(string filePath)
         {
@@ -66,9 +67,41 @@ namespace RLNeuralNetwork
                         inputs.Add(input);
                     }
                     double value = double.Parse(valueString);
-                    inputDatas.Add(new InputData(inputs.ToArray(), value));
+                    inputDatas.Add(new InputData(inputs.ToArray(), new double[] {value}));
                 }
                 
+            }
+            return inputDatas.ToArray();
+        }
+
+        static InputData[] ReadAdvancedOverwatchResults(string filePath)
+        {
+            StreamReader sr = new StreamReader(filePath);
+            string arrayString = sr.ReadToEnd();
+            arrayString = arrayString.Replace("\t", "").Replace(";", "").Replace("\r\n", "").Replace(" ", "");
+            string[] arraysByMatch = arrayString.Split("Global.inputResults=Array(");
+            List<InputData> inputDatas = new List<InputData>();
+            for (int i = 1; i < arraysByMatch.Length; i++)
+            {
+                string[] results = arraysByMatch[i].Split(")),");
+                for (int j = 0; j < results.Length; j++)
+                {
+                    List<string> list = results[j].Split("Array(").ToList<string>();
+                    list.RemoveAt(2);
+                    list.RemoveAt(0);
+                    string[] arrays = list.ToArray();
+                    double[][] arrayNumbers = new double[arrays.Length][];
+                    for (int k = 0; k < arrays.Length; k++)
+                    {
+                        arrays[k] = arrays[k].Replace("),", "").Replace(")))", "");
+                        string[] numberStrings = arrays[k].Split(",");
+                        arrayNumbers[k] = new double[numberStrings.Length];
+                        for (int l = 0; l < numberStrings.Length; l++)
+                        {
+                            arrayNumbers[k][l] = double.Parse(numberStrings[l]);
+                        }
+                    }
+                }
             }
             return inputDatas.ToArray();
         }
@@ -188,7 +221,7 @@ namespace RLNeuralNetwork
                 {
                     foreach (InputData x in data)
                     {
-                        NN.backPropagate(x.inputs, new double[] { x.value }, 1 / ((j)));
+                        NN.backPropagate(x.inputs, new double[] { x.values[0] }, 1 / ((j)));
                     }
                 }
                 double loss = 0;
@@ -199,12 +232,12 @@ namespace RLNeuralNetwork
                 {
                     if (x.inputs[49] >= 0.01 || x.inputs[50] >= 0.01 || x.inputs[51] >= 0.01)
                     {
-                        loss2 += Math.Abs(x.value - NN.feedForward(x.inputs)[0]);
+                        loss2 += Math.Abs(x.values[0] - NN.feedForward(x.inputs)[0]);
                         lossCount2++;
                     }
                     else
                     {
-                        loss += Math.Abs(x.value - NN.feedForward(x.inputs)[0]);
+                        loss += Math.Abs(x.values[0] - NN.feedForward(x.inputs)[0]);
                         lossCount++;
                     }
                 }
@@ -230,7 +263,7 @@ namespace RLNeuralNetwork
                 {
                     for (int k = 0; k < data.Length; k++)
                     {
-                        WDNN.backPropagate(data[k].inputs, wideData[k].inputs, new double[] { data[k].value }, 1 / ((j)));
+                        WDNN.backPropagate(data[k].inputs, wideData[k].inputs, new double[] { data[k].values[0] }, 1 / ((j)));
                     }
                 }
                 double loss = 0;
@@ -241,12 +274,12 @@ namespace RLNeuralNetwork
                 {
                     if (data[k].inputs[49] >= 0.01 || data[k].inputs[50] >= 0.01 || data[k].inputs[51] >= 0.01)
                     {
-                        loss2 += Math.Abs(data[k].value - WDNN.wideDeepFeedForward(data[k].inputs, wideData[k].inputs)[0]);
+                        loss2 += Math.Abs(data[k].values[0] - WDNN.wideDeepFeedForward(data[k].inputs, wideData[k].inputs)[0]);
                         lossCount2++;
                     }
                     else
                     {
-                        loss += Math.Abs(data[k].value - WDNN.wideDeepFeedForward(data[k].inputs, wideData[k].inputs)[0]);
+                        loss += Math.Abs(data[k].values[0] - WDNN.wideDeepFeedForward(data[k].inputs, wideData[k].inputs)[0]);
                         lossCount++;
                     }
                 }
@@ -269,7 +302,7 @@ namespace RLNeuralNetwork
             {
                 for (int j = 0; j < data.Length; j++)
                 {
-                    WDNN.backPropagate(data[j].inputs, wideData[j].inputs, new double[] { data[j].value }, 1 / ((i)));
+                    WDNN.backPropagate(data[j].inputs, wideData[j].inputs, new double[] { data[j].values[0] }, 1 / ((i)));
                 }
             }
             double[] w1 = new double[WDNN.outputLayer.weights.GetLength(0)];
@@ -293,12 +326,12 @@ namespace RLNeuralNetwork
             {
                 if (data[k].inputs[49] >= 0.01 || data[k].inputs[50] >= 0.01 || data[k].inputs[51] >= 0.01)
                 {
-                    loss2 += Math.Abs(data[k].value - WDNN.wideDeepFeedForward(data[k].inputs, wideData[k].inputs)[0]);
+                    loss2 += Math.Abs(data[k].values[0] - WDNN.wideDeepFeedForward(data[k].inputs, wideData[k].inputs)[0]);
                     lossCount2++;
                 }
                 else
                 {
-                    loss += Math.Abs(data[k].value - WDNN.wideDeepFeedForward(data[k].inputs, wideData[k].inputs)[0]);
+                    loss += Math.Abs(data[k].values[0] - WDNN.wideDeepFeedForward(data[k].inputs, wideData[k].inputs)[0]);
                     lossCount++;
                 }
             }
@@ -333,6 +366,7 @@ namespace RLNeuralNetwork
         {
             Console.WriteLine("Enter filepath:");
             string path = Console.ReadLine();
+            ReadAdvancedOverwatchResults(path);
             InputData[] data = ReadOverwatchResults(path);
             InputData[] wideData = data;
             for (int i = 49; i <= 51; i++)
@@ -346,7 +380,7 @@ namespace RLNeuralNetwork
                 }
             }
             //testLoss(data, wideData);
-            createOWArray(data, wideData);
+            //createOWArray(data, wideData);
             //overwatchParityTest();
 
         }
