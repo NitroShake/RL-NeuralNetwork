@@ -81,8 +81,10 @@ namespace RLNeuralNetwork
             arrayString = arrayString.Replace("\t", "").Replace(";", "").Replace("\r\n", "").Replace(" ", "");
             string[] arraysByMatch = arrayString.Split("Global.inputResults=Array(");
             List<InputData> inputDatas = new List<InputData>();
+            //get each set of results/match, then iterate over them.
             for (int i = 1; i < arraysByMatch.Length; i++)
             {
+                //Get each action result, then iterate over them
                 string[] results = arraysByMatch[i].Split(")),");
                 for (int j = 0; j < results.Length; j++)
                 {
@@ -91,6 +93,7 @@ namespace RLNeuralNetwork
                     list.RemoveAt(0);
                     string[] arrays = list.ToArray();
                     double[][] arrayNumbers = new double[arrays.Length][];
+                    //Read the value arrays.
                     for (int k = 0; k < arrays.Length; k++)
                     {
                         arrays[k] = arrays[k].Replace("),", "").Replace(")))", "");
@@ -101,9 +104,55 @@ namespace RLNeuralNetwork
                             arrayNumbers[k][l] = double.Parse(numberStrings[l]);
                         }
                     }
+                    //Get values from each value array.
+                    double[] finalValues = new double[arrays.Length - 2];
+                    for (int k = 1; k < arrayNumbers.Length - 1; k++)
+                    {
+                        finalValues[k - 1] = arrayNumbers[k][arrayNumbers[k].Length - 1];
+                    }
+                    inputDatas.Add(new InputData(arrayNumbers[0], finalValues));
                 }
             }
             return inputDatas.ToArray();
+        }
+
+        //Converts a set of text files, each containing a set of exported variables from a match, into a single text file that can be used for the other functions.
+        static void AssembleOverwatchResults()
+        {
+            Console.WriteLine("Enter directory to assemble results from:");
+            string directory = Console.ReadLine();
+            List<string> fileList = Directory.GetFiles(directory, "*.txt").ToList<string>();
+            fileList.Remove(directory + "\\results.txt");
+            string[] files = fileList.ToArray();
+            StreamWriter resultWriter = new(directory + "/results.txt");
+            foreach (string file in files)
+            {
+                bool isFirstResultSetFromFile = true;
+                StreamReader sr = new(file);
+                string text = sr.ReadToEnd();
+                string[] codeLines = text.Split(';');
+                string textToAdd = "";
+                foreach (string line in codeLines)
+                {
+                    if (line.Contains("Global.inputResults ="))
+                    {
+                        if (isFirstResultSetFromFile)
+                        {
+                            textToAdd += line;
+                            isFirstResultSetFromFile = false;
+                        } 
+                        else
+                        {
+                            textToAdd = textToAdd.Replace(")))", ")), ");
+                            textToAdd += line.Replace("\n\tGlobal.inputResults = Array(", "");
+                        }
+                    }
+                }
+                textToAdd = textToAdd.Substring(2); 
+                textToAdd += ";\n";
+                resultWriter.Write(textToAdd);
+            }
+            resultWriter.Close();
         }
 
         static void ExportAsOverwatchArray(double[,] w1, double[] w2, double[] wideW)
@@ -364,6 +413,7 @@ namespace RLNeuralNetwork
 
         static void Main(string[] args)
         {
+            AssembleOverwatchResults();
             Console.WriteLine("Enter filepath:");
             string path = Console.ReadLine();
             ReadAdvancedOverwatchResults(path);
