@@ -264,8 +264,8 @@ namespace RLNeuralNetwork
 
         static void createOWArray(InputData[] data, InputData[] wideData)
         {
-            WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 31, 0.01, 0.5) }, new WideDeepOutputLayer(31, 55, 1, 0.001, 0.00001, 0.1));
-            for (int i = 1; i <= 2; i++)
+            WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 31, 0.01, 0.5) }, new WideDeepOutputLayer(31, 55, 1, 0.01, 0.01, 0.1));
+            for (int i = 1; i <= 5; i++)
             {
                 for (int j = 0; j < data.Length; j++)
                 {
@@ -345,8 +345,8 @@ namespace RLNeuralNetwork
                     }
                 }
             }
-            testLoss(data, wideData);
-            //createOWArray(data, wideData);
+            //testLoss(data, wideData);
+            createOWArray(data, wideData);
             //overwatchParityTest();
 
         }
