@@ -93,7 +93,7 @@ namespace RLNeuralNetwork
                     list.RemoveAt(0);
                     string[] arrays = list.ToArray();
                     double[][] arrayNumbers = new double[arrays.Length][];
-                    //Read the value arrays.
+                    //Read the value arrays. The resulting array is in the form [[inputs], [valuesteps1], [valuesteps2]... [timesteps]]
                     for (int k = 0; k < arrays.Length; k++)
                     {
                         arrays[k] = arrays[k].Replace("),", "").Replace(")))", "");
@@ -105,10 +105,38 @@ namespace RLNeuralNetwork
                         }
                     }
                     //Get values from each value array.
+                    //The exported variables from OW include each value at each timestep, but each one has already had a discount rate applied
+                    //This algorithm undoes that lowering via overwatchTimeModifier, then allows reapplying time modifiers via newTimeModifier
+                    //In effect, this allows the value to be re-calculated for different discount rates
                     double[] finalValues = new double[arrays.Length - 2];
                     for (int k = 1; k < arrayNumbers.Length - 1; k++)
                     {
-                        finalValues[k - 1] = arrayNumbers[k][arrayNumbers[k].Length - 1];
+                        double[] valueSteps = new double[arrayNumbers[k].Length];
+                        for (int l = 0; l < valueSteps.Length; l++)
+                        {
+                            valueSteps[l] = arrayNumbers[k][l] - (l > 0 ? arrayNumbers[k][l] : 0);
+                        }
+
+                        double value = 0;
+
+                        for (int l = 0; l < valueSteps.Length; l++)
+                        {
+                            double originalDiscountRate;
+                            double newDiscountRate;
+                            if (arrayNumbers[0][49] > 0 || arrayNumbers[0][49] > 0 || arrayNumbers[0][49] > 0)
+                            {
+                                originalDiscountRate = 0.85;
+                                newDiscountRate = 0.85;
+                            }
+                            else
+                            {
+                                originalDiscountRate = 0.5;
+                                newDiscountRate = 0.5;
+                            }
+                            value += (valueSteps[l] / Math.Pow(originalDiscountRate, arrayNumbers[arrayNumbers.Length - 1][l])) * Math.Pow(newDiscountRate, arrayNumbers[arrayNumbers.Length - 1][l]);
+                        }
+
+                        finalValues[k - 1] = value;
                     }
                     inputDatas.Add(new InputData(arrayNumbers[0], finalValues));
                 }
