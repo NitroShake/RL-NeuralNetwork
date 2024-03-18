@@ -84,7 +84,7 @@ namespace RLNeuralNetwork
                 //compute other layers as normal
                 for (int j = 1; j < hiddenLayers.Length; j++)
                 {
-                    layerNodes = feedForward(layerNodes);
+                    layerNodes = hiddenLayers[j].feedforward(layerNodes);
                 }
                 layerNodes = outputLayer.feedforward(layerNodes);
 

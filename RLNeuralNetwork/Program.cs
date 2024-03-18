@@ -439,8 +439,79 @@ namespace RLNeuralNetwork
             return array;
         }
 
+        static void runPerformanceTests()
+        {
+            Stopwatch stopwatch = new Stopwatch();
+            int largeSize = 1000;
+            int smallSize = 200;
+            int extraInputSize = 20;
+            NeuralNetwork[] networks = new NeuralNetwork[]
+            {
+                new(new HiddenLayer[] { new HiddenLayer(smallSize, smallSize, 0.1, 0.01) }, new OutputLayer(smallSize, 1, 0.01, 0.01)),
+                new(new HiddenLayer[] { new HiddenLayer(smallSize, smallSize, 0.1, 0.01), new HiddenLayer(smallSize, smallSize, 0.1, 0.01) }, new OutputLayer(smallSize, 1, 0.01, 0.01)),
+                new(new HiddenLayer[] { new HiddenLayer(largeSize, largeSize, 0.1, 0.01) }, new OutputLayer(largeSize, 1, 0.01, 0.01)),
+                new(new HiddenLayer[] { new HiddenLayer(largeSize, largeSize, 0.1, 0.01), new HiddenLayer(largeSize, largeSize, 0.1, 0.01) }, new OutputLayer(largeSize, 1, 0.01, 0.01))
+            };
+
+            double[] inputs = new double[largeSize - extraInputSize];
+            Random random = new Random();
+            for (int i = 0; i < inputs.Length; i++)
+            {
+                inputs[i] = random.NextDouble() - 0.5;
+            }
+            double[] smallInputs = inputs[0..(smallSize - extraInputSize)];
+            double[] extraInputs = inputs[0..extraInputSize];
+            double[,] extraInputsArray = new double[25, extraInputSize];
+            for (int i = 0; i < extraInputsArray.GetLength(0); i++)
+            {
+                for (int j = 0; j < extraInputs.Length; j++)
+                {
+                    extraInputsArray[i, j] = extraInputs[j];
+                }
+            }
+
+            for (int i = 0; i < networks.Length; i++)
+            {
+                double[] finalInputs;
+                if (networks[i].hiddenLayers[0].weights.GetLength(0) > smallSize) { finalInputs = inputs; }
+                else { finalInputs = smallInputs; }
+                double time = 0;
+                for (int j = 0;j < 10; j++)
+                {
+                    stopwatch.Reset();
+                    stopwatch.Start();
+                    networks[i].optimisedFeedForward(finalInputs, extraInputsArray);
+                    stopwatch.Stop();
+                    time += stopwatch.ElapsedTicks;
+                }
+                Console.WriteLine(time / 10);
+
+                time = 0;
+                stopwatch.Reset();
+
+                List<double> concatInputs = new List<double>();
+                concatInputs.AddRange(finalInputs);
+                concatInputs.AddRange(extraInputs);
+                finalInputs = concatInputs.ToArray();
+
+                for (int j = 0; j < 10; j++)
+                {
+                    stopwatch.Reset();
+                    stopwatch.Start();
+                    for (int k = 0; k < extraInputsArray.GetLength(0); k++)
+                    {
+                        networks[i].feedForward(finalInputs);
+                    }
+                    stopwatch.Stop();
+                    time += stopwatch.ElapsedTicks;
+                }
+                Console.WriteLine(time / 10);
+            }
+        }
+
         static void Main(string[] args)
         {
+            runPerformanceTests();
             //AssembleOverwatchResults();
             Console.WriteLine("Enter filepath:");
             string path = Console.ReadLine();
