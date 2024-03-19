@@ -114,7 +114,7 @@ namespace RLNeuralNetwork
                         double[] valueSteps = new double[arrayNumbers[k].Length];
                         for (int l = 0; l < valueSteps.Length; l++)
                         {
-                            valueSteps[l] = arrayNumbers[k][l] - (l > 0 ? arrayNumbers[k][l] : 0);
+                            valueSteps[l] = arrayNumbers[k][l] - (l > 0 ? arrayNumbers[k][l - 1] : 0);
                         }
 
                         double value = 0;
@@ -126,19 +126,19 @@ namespace RLNeuralNetwork
                             if (arrayNumbers[0][49] > 0 || arrayNumbers[0][49] > 0 || arrayNumbers[0][49] > 0)
                             {
                                 originalDiscountRate = 0.85;
-                                newDiscountRate = 0.85;
+                                newDiscountRate = 0.6;
                             }
                             else
                             {
                                 originalDiscountRate = 0.5;
-                                newDiscountRate = 0.5;
+                                newDiscountRate = 0.45;
                             }
                             value += (valueSteps[l] / Math.Pow(originalDiscountRate, arrayNumbers[arrayNumbers.Length - 1][l])) * Math.Pow(newDiscountRate, arrayNumbers[arrayNumbers.Length - 1][l]);
                         }
 
                         finalValues[k - 1] = value;
                     }
-                    inputDatas.Add(new InputData(arrayNumbers[0], finalValues));
+                    inputDatas.Add(new InputData(arrayNumbers[0][0..55], finalValues));
                 }
             }
             return inputDatas.ToArray();
@@ -293,7 +293,7 @@ namespace RLNeuralNetwork
             double metaLossCount2 = 0;
             for (int i = 0; i < 10; i++)
             {
-                NeuralNetwork NN = new NeuralNetwork(new HiddenLayer[] { new HiddenLayer(data[0].inputs.Length, data[0].inputs.Length, 0.1, 0.005) }, new OutputLayer(data[0].inputs.Length, data[0].values.Length, 0.01, 0.001));
+                NeuralNetwork NN = new NeuralNetwork(new HiddenLayer[] { new HiddenLayer(data[0].inputs.Length, data[0].inputs.Length, 0.05, 0.005) }, new OutputLayer(data[0].inputs.Length, data[0].values.Length, 0.001, 0.001));
                 for (int j = 1; j <= 1; j++)
                 {
                     foreach (InputData x in data)
@@ -335,7 +335,7 @@ namespace RLNeuralNetwork
             WideDeepNeuralNetwork s;
             for (int i = 0; i < 10; i++)
             {
-                WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(data[0].inputs.Length, data[0].inputs.Length, 0.1, 0.005) }, new WideDeepOutputLayer(data[0].inputs.Length, wideData[0].inputs.Length, data[0].values.Length, 0.01, 0.000001, 0.001));
+                WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(data[0].inputs.Length, data[0].inputs.Length, 0.05, 0.005) }, new WideDeepOutputLayer(data[0].inputs.Length, wideData[0].inputs.Length, data[0].values.Length, 0.001, 0.00001, 0.001));
                 for (int j = 1; j <= 3; j++)
                 {
                     for (int k = 0; k < data.Length; k++)
@@ -450,7 +450,8 @@ namespace RLNeuralNetwork
                 new(new HiddenLayer[] { new HiddenLayer(smallSize, smallSize, 0.1, 0.01) }, new OutputLayer(smallSize, 1, 0.01, 0.01)),
                 new(new HiddenLayer[] { new HiddenLayer(smallSize, smallSize, 0.1, 0.01), new HiddenLayer(smallSize, smallSize, 0.1, 0.01) }, new OutputLayer(smallSize, 1, 0.01, 0.01)),
                 new(new HiddenLayer[] { new HiddenLayer(largeSize, largeSize, 0.1, 0.01) }, new OutputLayer(largeSize, 1, 0.01, 0.01)),
-                new(new HiddenLayer[] { new HiddenLayer(largeSize, largeSize, 0.1, 0.01), new HiddenLayer(largeSize, largeSize, 0.1, 0.01) }, new OutputLayer(largeSize, 1, 0.01, 0.01))
+                new(new HiddenLayer[] { new HiddenLayer(largeSize, largeSize, 0.1, 0.01), new HiddenLayer(largeSize, largeSize, 0.1, 0.01) }, new OutputLayer(largeSize, 1, 0.01, 0.01)),
+                new(new HiddenLayer[] { new HiddenLayer(largeSize, (int)(largeSize * 0.6f), 0.1, 0.01), new HiddenLayer((int)(largeSize * 0.6f), (int)(largeSize * 0.6f), 0.1, 0.01) }, new OutputLayer((int)(largeSize * 0.6f), 1, 0.01, 0.01))
             };
 
             double[] inputs = new double[largeSize - extraInputSize];
@@ -511,11 +512,12 @@ namespace RLNeuralNetwork
 
         static void Main(string[] args)
         {
-            runPerformanceTests();
+            //runPerformanceTests();
             //AssembleOverwatchResults();
             Console.WriteLine("Enter filepath:");
             string path = Console.ReadLine();
-            ReadAdvancedOverwatchResults(path);
+            //ReadAdvancedOverwatchResults(path);
+            //Console.ReadKey();
             InputData[] data = ReadAdvancedOverwatchResults(path);
             for (int i = 0; i < data.Length; i++)
             {
