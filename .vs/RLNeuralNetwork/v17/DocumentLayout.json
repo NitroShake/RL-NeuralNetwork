@@ -1,0 +1,169 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Camer\\source\\repos\\RLNeuralNetwork\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{CF15F38C-09E8-4C37-A1CC-0FD850B98BC1}|RLNeuralNetwork\\RLNeuralNetwork.csproj|c:\\users\\camer\\source\\repos\\rlneuralnetwork\\rlneuralnetwork\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CF15F38C-09E8-4C37-A1CC-0FD850B98BC1}|RLNeuralNetwork\\RLNeuralNetwork.csproj|solutionrelative:rlneuralnetwork\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CF15F38C-09E8-4C37-A1CC-0FD850B98BC1}|RLNeuralNetwork\\RLNeuralNetwork.csproj|c:\\users\\camer\\source\\repos\\rlneuralnetwork\\rlneuralnetwork\\networklayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CF15F38C-09E8-4C37-A1CC-0FD850B98BC1}|RLNeuralNetwork\\RLNeuralNetwork.csproj|solutionrelative:rlneuralnetwork\\networklayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CF15F38C-09E8-4C37-A1CC-0FD850B98BC1}|RLNeuralNetwork\\RLNeuralNetwork.csproj|c:\\users\\camer\\source\\repos\\rlneuralnetwork\\rlneuralnetwork\\widedeepneuralnetwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CF15F38C-09E8-4C37-A1CC-0FD850B98BC1}|RLNeuralNetwork\\RLNeuralNetwork.csproj|solutionrelative:rlneuralnetwork\\widedeepneuralnetwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CF15F38C-09E8-4C37-A1CC-0FD850B98BC1}|RLNeuralNetwork\\RLNeuralNetwork.csproj|c:\\users\\camer\\source\\repos\\rlneuralnetwork\\rlneuralnetwork\\outputlayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CF15F38C-09E8-4C37-A1CC-0FD850B98BC1}|RLNeuralNetwork\\RLNeuralNetwork.csproj|solutionrelative:rlneuralnetwork\\outputlayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CF15F38C-09E8-4C37-A1CC-0FD850B98BC1}|RLNeuralNetwork\\RLNeuralNetwork.csproj|c:\\users\\camer\\source\\repos\\rlneuralnetwork\\rlneuralnetwork\\neuralnetwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CF15F38C-09E8-4C37-A1CC-0FD850B98BC1}|RLNeuralNetwork\\RLNeuralNetwork.csproj|solutionrelative:rlneuralnetwork\\neuralnetwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Camer\\Documents\\vars 2\\results\\results.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CF15F38C-09E8-4C37-A1CC-0FD850B98BC1}|RLNeuralNetwork\\RLNeuralNetwork.csproj|c:\\users\\camer\\source\\repos\\rlneuralnetwork\\rlneuralnetwork\\hiddenlayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CF15F38C-09E8-4C37-A1CC-0FD850B98BC1}|RLNeuralNetwork\\RLNeuralNetwork.csproj|solutionrelative:rlneuralnetwork\\hiddenlayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CF15F38C-09E8-4C37-A1CC-0FD850B98BC1}|RLNeuralNetwork\\RLNeuralNetwork.csproj|c:\\users\\camer\\source\\repos\\rlneuralnetwork\\rlneuralnetwork\\widedeepoutputlayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CF15F38C-09E8-4C37-A1CC-0FD850B98BC1}|RLNeuralNetwork\\RLNeuralNetwork.csproj|solutionrelative:rlneuralnetwork\\widedeepoutputlayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CF15F38C-09E8-4C37-A1CC-0FD850B98BC1}|RLNeuralNetwork\\RLNeuralNetwork.csproj|c:\\users\\camer\\source\\repos\\rlneuralnetwork\\rlneuralnetwork\\rlneuralnetwork.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{CF15F38C-09E8-4C37-A1CC-0FD850B98BC1}|RLNeuralNetwork\\RLNeuralNetwork.csproj|solutionrelative:rlneuralnetwork\\rlneuralnetwork.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "results.txt",
+              "DocumentMoniker": "C:\\Users\\Camer\\Documents\\vars 2\\results\\results.txt",
+              "RelativeDocumentMoniker": "..\\..\\..\\Documents\\vars 2\\results\\results.txt",
+              "ToolTip": "C:\\Users\\Camer\\Documents\\vars 2\\results\\results.txt",
+              "RelativeToolTip": "..\\..\\..\\Documents\\vars 2\\results\\results.txt",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2024-03-16T11:29:51.344Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Camer\\source\\repos\\RLNeuralNetwork\\RLNeuralNetwork\\Program.cs",
+              "RelativeDocumentMoniker": "RLNeuralNetwork\\Program.cs",
+              "ToolTip": "C:\\Users\\Camer\\source\\repos\\RLNeuralNetwork\\RLNeuralNetwork\\Program.cs",
+              "RelativeToolTip": "RLNeuralNetwork\\Program.cs",
+              "ViewState": "AQIAADYCAAAAAAAAAAAAAFICAAA5AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-02-26T18:05:13.577Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "HiddenLayer.cs",
+              "DocumentMoniker": "C:\\Users\\Camer\\source\\repos\\RLNeuralNetwork\\RLNeuralNetwork\\HiddenLayer.cs",
+              "RelativeDocumentMoniker": "RLNeuralNetwork\\HiddenLayer.cs",
+              "ToolTip": "C:\\Users\\Camer\\source\\repos\\RLNeuralNetwork\\RLNeuralNetwork\\HiddenLayer.cs",
+              "RelativeToolTip": "RLNeuralNetwork\\HiddenLayer.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAACaAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-02-19T17:45:20.084Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "WideDeepNeuralNetwork.cs",
+              "DocumentMoniker": "C:\\Users\\Camer\\source\\repos\\RLNeuralNetwork\\RLNeuralNetwork\\WideDeepNeuralNetwork.cs",
+              "RelativeDocumentMoniker": "RLNeuralNetwork\\WideDeepNeuralNetwork.cs",
+              "ToolTip": "C:\\Users\\Camer\\source\\repos\\RLNeuralNetwork\\RLNeuralNetwork\\WideDeepNeuralNetwork.cs",
+              "RelativeToolTip": "RLNeuralNetwork\\WideDeepNeuralNetwork.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAEQAAAAcAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-02-19T17:49:48.64Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "OutputLayer.cs",
+              "DocumentMoniker": "C:\\Users\\Camer\\source\\repos\\RLNeuralNetwork\\RLNeuralNetwork\\OutputLayer.cs",
+              "RelativeDocumentMoniker": "RLNeuralNetwork\\OutputLayer.cs",
+              "ToolTip": "C:\\Users\\Camer\\source\\repos\\RLNeuralNetwork\\RLNeuralNetwork\\OutputLayer.cs",
+              "RelativeToolTip": "RLNeuralNetwork\\OutputLayer.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAABeAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-02-19T17:49:10.917Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "RLNeuralNetwork.csproj",
+              "DocumentMoniker": "C:\\Users\\Camer\\source\\repos\\RLNeuralNetwork\\RLNeuralNetwork\\RLNeuralNetwork.csproj",
+              "RelativeDocumentMoniker": "RLNeuralNetwork\\RLNeuralNetwork.csproj",
+              "ToolTip": "C:\\Users\\Camer\\source\\repos\\RLNeuralNetwork\\RLNeuralNetwork\\RLNeuralNetwork.csproj",
+              "RelativeToolTip": "RLNeuralNetwork\\RLNeuralNetwork.csproj",
+              "ViewState": "AQIAAAAAAAAAAAAAAADwvwAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-02-19T22:25:15.043Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "NeuralNetwork.cs",
+              "DocumentMoniker": "C:\\Users\\Camer\\source\\repos\\RLNeuralNetwork\\RLNeuralNetwork\\NeuralNetwork.cs",
+              "RelativeDocumentMoniker": "RLNeuralNetwork\\NeuralNetwork.cs",
+              "ToolTip": "C:\\Users\\Camer\\source\\repos\\RLNeuralNetwork\\RLNeuralNetwork\\NeuralNetwork.cs",
+              "RelativeToolTip": "RLNeuralNetwork\\NeuralNetwork.cs",
+              "ViewState": "AQIAAEAAAAAAAAAAAAAtwFkAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-02-19T17:45:20.661Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "NetworkLayer.cs",
+              "DocumentMoniker": "C:\\Users\\Camer\\source\\repos\\RLNeuralNetwork\\RLNeuralNetwork\\NetworkLayer.cs",
+              "RelativeDocumentMoniker": "RLNeuralNetwork\\NetworkLayer.cs",
+              "ToolTip": "C:\\Users\\Camer\\source\\repos\\RLNeuralNetwork\\RLNeuralNetwork\\NetworkLayer.cs",
+              "RelativeToolTip": "RLNeuralNetwork\\NetworkLayer.cs",
+              "ViewState": "AQIAAAcAAAAAAAAAAAAtwBkAAABBAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-02-19T17:45:19.398Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "WideDeepOutputLayer.cs",
+              "DocumentMoniker": "C:\\Users\\Camer\\source\\repos\\RLNeuralNetwork\\RLNeuralNetwork\\WideDeepOutputLayer.cs",
+              "RelativeDocumentMoniker": "RLNeuralNetwork\\WideDeepOutputLayer.cs",
+              "ToolTip": "C:\\Users\\Camer\\source\\repos\\RLNeuralNetwork\\RLNeuralNetwork\\WideDeepOutputLayer.cs",
+              "RelativeToolTip": "RLNeuralNetwork\\WideDeepOutputLayer.cs",
+              "ViewState": "AQIAAEwAAAAAAAAAAAAAADcAAAAUAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-02-19T17:43:37.34Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -123,15 +123,15 @@ namespace RLNeuralNetwork
                         {
                             double originalDiscountRate;
                             double newDiscountRate;
-                            if (arrayNumbers[0][49] > 0 || arrayNumbers[0][49] > 0 || arrayNumbers[0][49] > 0)
+                            if (arrayNumbers[0][49] > 0 || arrayNumbers[0][50] > 0 || arrayNumbers[0][51] > 0)
                             {
                                 originalDiscountRate = 0.85;
-                                newDiscountRate = 0.6;
+                                newDiscountRate = 0.85;
                             }
                             else
                             {
                                 originalDiscountRate = 0.5;
-                                newDiscountRate = 0.45;
+                                newDiscountRate = 0.5;
                             }
                             value += (valueSteps[l] / Math.Pow(originalDiscountRate, arrayNumbers[arrayNumbers.Length - 1][l])) * Math.Pow(newDiscountRate, arrayNumbers[arrayNumbers.Length - 1][l]);
                         }
@@ -225,12 +225,15 @@ namespace RLNeuralNetwork
             }
             sw.WriteLine(weights);
 
-            weights = "\tGlobal.wideWeightImport = Array(";
-            for (int i = 0; i < wideW.Length; i++)
+            if (wideW.Length > 0)
             {
-                weights += i != wideW.Length - 1 ? Math.Round(wideW[i], dp) + ", " : Math.Round(wideW[i], dp) + ");";
+                weights = "\tGlobal.wideWeightImport = Array(";
+                for (int i = 0; i < wideW.Length; i++)
+                {
+                    weights += i != wideW.Length - 1 ? Math.Round(wideW[i], dp) + ", " : Math.Round(wideW[i], dp) + ");";
+                }
+                sw.WriteLine(weights);
             }
-            sw.WriteLine(weights);
 
             sw.WriteLine("}");
             sw.Close();
@@ -294,7 +297,7 @@ namespace RLNeuralNetwork
             for (int i = 0; i < 10; i++)
             {
                 NeuralNetwork NN = new NeuralNetwork(new HiddenLayer[] { new HiddenLayer(data[0].inputs.Length, data[0].inputs.Length, 0.05, 0.005) }, new OutputLayer(data[0].inputs.Length, data[0].values.Length, 0.001, 0.001));
-                for (int j = 1; j <= 1; j++)
+                for (int j = 1; j <= 2; j++)
                 {
                     foreach (InputData x in data)
                     {
@@ -336,7 +339,7 @@ namespace RLNeuralNetwork
             for (int i = 0; i < 10; i++)
             {
                 WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(data[0].inputs.Length, data[0].inputs.Length, 0.05, 0.005) }, new WideDeepOutputLayer(data[0].inputs.Length, wideData[0].inputs.Length, data[0].values.Length, 0.001, 0.00001, 0.001));
-                for (int j = 1; j <= 3; j++)
+                for (int j = 1; j <= 2; j++)
                 {
                     for (int k = 0; k < data.Length; k++)
                     {
@@ -372,7 +375,48 @@ namespace RLNeuralNetwork
             Console.WriteLine("ee"); //literally just for breakpoints
         }
 
-        static void createOWArray(InputData[] data, InputData[] wideData)
+        static void createOWArray(InputData[] data)
+        {
+            NeuralNetwork nn = new NeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 31, 0.01, 0.5) }, new OutputLayer(31, 1, 0.01, 0.1));
+            for (int i = 1; i <= 5; i++)
+            {
+                for (int j = 0; j < data.Length; j++)
+                {
+                    nn.backPropagate(data[j].inputs, new double[] { data[j].values[0] }, 1 / ((i)));
+                }
+            }
+            double[] w1 = new double[nn.outputLayer.weights.GetLength(0)];
+            for (int i = 0; i < nn.outputLayer.weights.GetLength(0); i++)
+            {
+                w1[i] = nn.outputLayer.weights[i, 0];
+            }
+            double[] ww = new double[] { };
+
+            ExportAsOverwatchArray(nn.hiddenLayers[0].weights, w1, ww);
+
+            double loss = 0;
+            int lossCount = 0;
+            double loss2 = 0;
+            int lossCount2 = 0;
+            for (int k = 0; k < data.Length; k++)
+            {
+                if (data[k].inputs[49] >= 0.01 || data[k].inputs[50] >= 0.01 || data[k].inputs[51] >= 0.01)
+                {
+                    loss2 += Math.Abs(data[k].values[0] - nn.feedForward(data[k].inputs)[0]);
+                    lossCount2++;
+                }
+                else
+                {
+                    loss += Math.Abs(data[k].values[0] - nn.feedForward(data[k].inputs)[0]);
+                    lossCount++;
+                }
+            }
+            Console.WriteLine(loss / lossCount);
+            Console.WriteLine(loss2 / lossCount2);
+            Console.WriteLine((loss + loss2) / (lossCount + lossCount2));
+        }
+
+        static void createWDOWArray(InputData[] data, InputData[] wideData)
         {
             WideDeepNeuralNetwork WDNN = new WideDeepNeuralNetwork(new HiddenLayer[] { new HiddenLayer(55, 31, 0.01, 0.5) }, new WideDeepOutputLayer(31, 55, 1, 0.01, 0.01, 0.1));
             for (int i = 1; i <= 5; i++)
@@ -399,22 +443,31 @@ namespace RLNeuralNetwork
             int lossCount = 0;
             double loss2 = 0;
             int lossCount2 = 0;
+            double ffTotal = 0;
+            double ffCount = 0;
             for (int k = 0; k < data.Length; k++)
             {
+                double ffResult;
                 if (data[k].inputs[49] >= 0.01 || data[k].inputs[50] >= 0.01 || data[k].inputs[51] >= 0.01)
                 {
-                    loss2 += Math.Abs(data[k].values[0] - WDNN.wideDeepFeedForward(data[k].inputs, wideData[k].inputs)[0]);
+                    ffResult = WDNN.wideDeepFeedForward(data[k].inputs, wideData[k].inputs)[0];
+                    ffTotal += Math.Abs(ffResult);
+                    loss2 += Math.Abs(data[k].values[0] - ffResult);
                     lossCount2++;
                 }
                 else
                 {
-                    loss += Math.Abs(data[k].values[0] - WDNN.wideDeepFeedForward(data[k].inputs, wideData[k].inputs)[0]);
+                    ffResult = WDNN.wideDeepFeedForward(data[k].inputs, wideData[k].inputs)[0];
+                    ffTotal += Math.Abs(ffResult);
+                    loss += Math.Abs(data[k].values[0] - ffResult);
                     lossCount++;
                 }
+                ffCount++;
             }
             Console.WriteLine(loss / lossCount);
             Console.WriteLine(loss2 / lossCount2);
             Console.WriteLine((loss + loss2) / (lossCount + lossCount2));
+            Console.WriteLine(ffTotal / ffCount);
         }
 
         static void overwatchParityTest()
@@ -519,6 +572,7 @@ namespace RLNeuralNetwork
             //ReadAdvancedOverwatchResults(path);
             //Console.ReadKey();
             InputData[] data = ReadAdvancedOverwatchResults(path);
+            //InputData[] data = ReadOverwatchResults(path);
             for (int i = 0; i < data.Length; i++)
             {
                 //data[i].inputs = data[i].inputs[0..55];
@@ -537,8 +591,30 @@ namespace RLNeuralNetwork
                     }
                 }
             }
-            testLoss(data, wideData);
-            //createOWArray(data, wideData);
+
+            List<InputData> list = new List<InputData>();
+            for (int i = 0; i < data.Length - 5; i++)
+            {
+                List<double> inputs = new List<double>();
+                inputs.AddRange(data[i].inputs);
+                InputData d = new(inputs.ToArray(), new double[] { data[i].values[0] });
+                list.Add(d);
+            }
+
+            testLoss(list.ToArray(), list.ToArray());
+            Console.WriteLine("---");
+            list = new List<InputData>();
+            for (int i = 0; i < data.Length - 5; i++)
+            {
+                List<double> inputs = new List<double>();
+                inputs.AddRange(data[i].inputs);
+                inputs.AddRange(data[i + 1].inputs);
+                InputData d = new(inputs.ToArray(), new double[] {data[i].values[0]});
+                list.Add(d);
+            }
+            testLoss(list.ToArray(), list.ToArray());
+            //createWDOWArray(data, wideData);
+            //createOWArray(data);
             //overwatchParityTest();
 
         }
