@@ -126,18 +126,34 @@ namespace RLNeuralNetwork
                             if (arrayNumbers[0][49] > 0 || arrayNumbers[0][50] > 0 || arrayNumbers[0][51] > 0)
                             {
                                 originalDiscountRate = 0.85;
-                                newDiscountRate = 0.85;
+                                newDiscountRate = 0.9;
                             }
                             else
                             {
                                 originalDiscountRate = 0.5;
                                 newDiscountRate = 0.5;
                             }
-                            value += (valueSteps[l] / Math.Pow(originalDiscountRate, arrayNumbers[arrayNumbers.Length - 1][l])) * Math.Pow(newDiscountRate, arrayNumbers[arrayNumbers.Length - 1][l]);
+                            if (k == 11)
+                            {
+                                value += (valueSteps[l] / Math.Pow(originalDiscountRate, arrayNumbers[arrayNumbers.Length - 1][l])) * Math.Pow(newDiscountRate, arrayNumbers[arrayNumbers.Length - 1][l]) * 1;
+                            } 
+                            else
+                            {
+                                value += (valueSteps[l] / Math.Pow(originalDiscountRate, arrayNumbers[arrayNumbers.Length - 1][l])) * Math.Pow(newDiscountRate, arrayNumbers[arrayNumbers.Length - 1][l]) * 1;
+                            }
                         }
 
                         finalValues[k - 1] = value;
                     }
+
+                    //first value is the total sum of the other values
+                    finalValues[0] = 0;
+                    for (int k = 1; k < finalValues.Length; k++)
+                    {
+                        finalValues[0] += finalValues[k];
+                    }
+
+
                     inputDatas.Add(new InputData(arrayNumbers[0][0..55], finalValues));
                 }
             }
@@ -290,6 +306,17 @@ namespace RLNeuralNetwork
 
         static void testLoss(InputData[] data, InputData[] wideData)
         {
+            double averageValueMagnitude = 0;
+            double valueCount = 0;
+            for (int i = 0; i < data.Length; i++)
+            {
+                averageValueMagnitude += Math.Abs(data[i].values[0]);
+                valueCount++;
+            }
+
+            averageValueMagnitude /= valueCount;
+            Console.WriteLine(averageValueMagnitude);
+
             double metaLoss = 0;
             double metaLossCount = 0;
             double metaLoss2 = 0;
@@ -297,7 +324,7 @@ namespace RLNeuralNetwork
             for (int i = 0; i < 10; i++)
             {
                 NeuralNetwork NN = new NeuralNetwork(new HiddenLayer[] { new HiddenLayer(data[0].inputs.Length, data[0].inputs.Length, 0.05, 0.005) }, new OutputLayer(data[0].inputs.Length, data[0].values.Length, 0.001, 0.001));
-                for (int j = 1; j <= 2; j++)
+                for (int j = 1; j <= 1; j++)
                 {
                     foreach (InputData x in data)
                     {
@@ -328,8 +355,8 @@ namespace RLNeuralNetwork
             }
             Console.WriteLine(metaLoss / metaLossCount);
             Console.WriteLine(metaLoss2 / metaLossCount2);
-            Console.WriteLine((metaLoss + metaLoss2) / (metaLossCount + metaLossCount2));
-            Console.WriteLine("ee");
+            Console.WriteLine((metaLoss + metaLoss2) / (metaLossCount + metaLossCount2) / averageValueMagnitude);
+
             Console.WriteLine("-------------------");
             metaLoss = 0;
             metaLossCount = 0;
@@ -363,15 +390,16 @@ namespace RLNeuralNetwork
                         lossCount++;
                     }
                 }
-                metaLoss += loss / lossCount;
-                metaLossCount++;
-                metaLoss2 += loss2 / lossCount2;
-                metaLossCount2++;
+                metaLoss += loss;
+                metaLossCount+= lossCount;
+                metaLoss2 += loss2;
+                metaLossCount2+= lossCount2;
                 s = WDNN;
             }
             Console.WriteLine(metaLoss / metaLossCount);
             Console.WriteLine(metaLoss2 / metaLossCount2);
             Console.WriteLine((metaLoss + metaLoss2) / (metaLossCount + metaLossCount2));
+            Console.WriteLine(((metaLoss + metaLoss2) / (metaLossCount + metaLossCount2)) / averageValueMagnitude);
             Console.WriteLine("ee"); //literally just for breakpoints
         }
 
