@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -131,7 +132,7 @@ namespace RLNeuralNetwork
                             else
                             {
                                 originalDiscountRate = 0.5;
-                                newDiscountRate = 0.5;
+                                newDiscountRate = 0.55;
                             }
                             if (k == 11)
                             {
@@ -525,75 +526,165 @@ namespace RLNeuralNetwork
             Stopwatch stopwatch = new Stopwatch();
             int largeSize = 1000;
             int smallSize = 200;
-            int extraInputSize = 20;
+            int tinySize = 55;
             NeuralNetwork[] networks = new NeuralNetwork[]
             {
+                new(new HiddenLayer[] { new HiddenLayer(tinySize, tinySize, 0.1, 0.01) }, new OutputLayer(tinySize, 1, 0.01, 0.01)),
+                new(new HiddenLayer[] { new HiddenLayer(tinySize, tinySize, 0.1, 0.01), new HiddenLayer(tinySize, tinySize, 0.1, 0.01) }, new OutputLayer(tinySize, 1, 0.01, 0.01)),
                 new(new HiddenLayer[] { new HiddenLayer(smallSize, smallSize, 0.1, 0.01) }, new OutputLayer(smallSize, 1, 0.01, 0.01)),
                 new(new HiddenLayer[] { new HiddenLayer(smallSize, smallSize, 0.1, 0.01), new HiddenLayer(smallSize, smallSize, 0.1, 0.01) }, new OutputLayer(smallSize, 1, 0.01, 0.01)),
                 new(new HiddenLayer[] { new HiddenLayer(largeSize, largeSize, 0.1, 0.01) }, new OutputLayer(largeSize, 1, 0.01, 0.01)),
                 new(new HiddenLayer[] { new HiddenLayer(largeSize, largeSize, 0.1, 0.01), new HiddenLayer(largeSize, largeSize, 0.1, 0.01) }, new OutputLayer(largeSize, 1, 0.01, 0.01)),
-                new(new HiddenLayer[] { new HiddenLayer(largeSize, (int)(largeSize * 0.6f), 0.1, 0.01), new HiddenLayer((int)(largeSize * 0.6f), (int)(largeSize * 0.6f), 0.1, 0.01) }, new OutputLayer((int)(largeSize * 0.6f), 1, 0.01, 0.01))
+                //new(new HiddenLayer[] { new HiddenLayer(largeSize, (int)(largeSize * 0.6f), 0.1, 0.01), new HiddenLayer((int)(largeSize * 0.6f), (int)(largeSize * 0.6f), 0.1, 0.01) }, new OutputLayer((int)(largeSize * 0.6f), 1, 0.01, 0.01))
             };
-
-            double[] inputs = new double[largeSize - extraInputSize];
-            Random random = new Random();
-            for (int i = 0; i < inputs.Length; i++)
-            {
-                inputs[i] = random.NextDouble() - 0.5;
-            }
-            double[] smallInputs = inputs[0..(smallSize - extraInputSize)];
-            double[] extraInputs = inputs[0..extraInputSize];
-            double[,] extraInputsArray = new double[25, extraInputSize];
-            for (int i = 0; i < extraInputsArray.GetLength(0); i++)
-            {
-                for (int j = 0; j < extraInputs.Length; j++)
-                {
-                    extraInputsArray[i, j] = extraInputs[j];
-                }
-            }
 
             for (int i = 0; i < networks.Length; i++)
             {
-                double[] finalInputs;
-                if (networks[i].hiddenLayers[0].weights.GetLength(0) > smallSize) { finalInputs = inputs; }
-                else { finalInputs = smallInputs; }
+                Console.WriteLine($"Testing NN with {networks[i].hiddenLayers.Length} layers and {networks[i].hiddenLayers[0].weights.GetLength(0)} inputs");
+                int inputSize = networks[i].hiddenLayers[0].weights.GetLength(0);
+                int extraInputSize = (inputSize / 10) + 1;
+                inputSize -= extraInputSize;
+                double[] inputs = new double[inputSize];
+                double[,] extraInputs = new double[extraInputSize, extraInputSize];
+                double[] fullInputs = new double[inputSize + extraInputSize];
+                
+                Random random = new Random();
+                for (int j = 0; j < inputs.Length; j++)
+                {
+                    inputs[j] = random.NextDouble() - 0.5;
+                }
+
+                for (int j = 0; j < extraInputs.GetLength(0); j++)
+                {
+                    for (int k = 0; k < extraInputs.GetLength(1); k++)
+                    {
+                        extraInputs[j, k] = random.NextDouble() - 0.5;
+                    }
+                }
+
+                for (int j = 0; j < fullInputs.Length; j++)
+                {
+                    fullInputs[j] = random.NextDouble() - 0.5;
+                }
+
+                /*                if (networks[i].hiddenLayers[0].weights.GetLength(0) > smallSize) { finalInputs = inputs; }
+                                else { finalInputs = smallInputs; }*/
                 double time = 0;
                 for (int j = 0;j < 10; j++)
                 {
                     stopwatch.Reset();
                     stopwatch.Start();
-                    networks[i].optimisedFeedForward(finalInputs, extraInputsArray);
+                    networks[i].optimisedFeedForward(inputs, extraInputs);
                     stopwatch.Stop();
                     time += stopwatch.ElapsedTicks;
                 }
-                Console.WriteLine(time / 10);
+                Console.WriteLine((time / 10) * 0.0001);
 
                 time = 0;
                 stopwatch.Reset();
 
-                List<double> concatInputs = new List<double>();
+/*                List<double> concatInputs = new List<double>();
                 concatInputs.AddRange(finalInputs);
                 concatInputs.AddRange(extraInputs);
-                finalInputs = concatInputs.ToArray();
+                finalInputs = concatInputs.ToArray();*/
 
                 for (int j = 0; j < 10; j++)
                 {
                     stopwatch.Reset();
                     stopwatch.Start();
-                    for (int k = 0; k < extraInputsArray.GetLength(0); k++)
+                    for (int k = 0; k < extraInputs.GetLength(0); k++)
                     {
-                        networks[i].feedForward(finalInputs);
+                        networks[i].feedForward(fullInputs);
                     }
                     stopwatch.Stop();
                     time += stopwatch.ElapsedTicks;
                 }
-                Console.WriteLine(time / 10);
+                Console.WriteLine((time / 10) * 0.0001);
             }
         }
 
         static void Main(string[] args)
         {
-            //runPerformanceTests();
+            Console.WriteLine("enter 1-6");
+            Console.Write("1. create OW array\n2. create wide-deep OW array\n3.test regular vs wide-deep using v1 results\n4. test regular vs wide-deep using v2 assembled results\n5. test NNs vs NNs with inputs from future\n6. assemble v2 results from folder\n7. create OW array from v2 assembled results\n8. create WD OW array from v2 assembled results\n9. performance tests\n");
+            int input = -1;
+            while(!int.TryParse(Console.ReadLine(), out input) && (input >= 1 || input <= 8))
+            {
+                Console.WriteLine("enter a valid number");
+            }
+
+            if (input == 1)
+            {
+                Console.WriteLine("Enter filepath:");
+                string path = Console.ReadLine();
+                InputData[] data = ReadOverwatchResults(path);
+                createOWArray(data);
+            }
+            else if (input == 2)
+            {
+                Console.WriteLine("Enter filepath:");
+                string path = Console.ReadLine();
+                InputData[] data = ReadOverwatchResults(path);
+                createWDOWArray(data, data);
+            }
+            else if (input == 3)
+            {
+                Console.WriteLine("Enter filepath:");
+                string path = Console.ReadLine();
+                InputData[] data = ReadOverwatchResults(path);
+                testLoss(data, data);
+            }
+            else if  (input == 4)
+            {
+                Console.WriteLine("Enter filepath:");
+                string path = Console.ReadLine();
+                InputData[] data = ReadAdvancedOverwatchResults(path);
+                testLoss(data, data);
+
+            }
+            else if (input == 5)
+            {
+                Console.WriteLine("Enter filepath:");
+                string path = Console.ReadLine();
+                InputData[] data = ReadAdvancedOverwatchResults(path);
+                List<InputData> list = new List<InputData>();
+                for (int i = 0; i < data.Length - 5; i++)
+                {
+                    List<double> inputs = new List<double>();
+                    inputs.AddRange(data[i].inputs);
+                    inputs.AddRange(data[i + 1].inputs);
+                    InputData d = new(inputs.ToArray(), new double[] { data[i].values[0] });
+                    list.Add(d);
+                }
+                testLoss(list.ToArray(), list.ToArray());
+            }
+            else if (input == 6)
+            {
+                AssembleOverwatchResults();
+            }
+            else if (input == 7)
+            {
+                Console.WriteLine("Enter filepath:");
+                string path = Console.ReadLine();
+                InputData[] data = ReadAdvancedOverwatchResults(path);
+                createOWArray(data);
+            }
+            else if (input == 8)
+            {
+                Console.WriteLine("Enter filepath:");
+                string path = Console.ReadLine();
+                InputData[] data = ReadAdvancedOverwatchResults(path);
+                createWDOWArray(data, data);
+            }
+            else if (input == 9)
+            {
+                runPerformanceTests();
+            }
+
+
+
+
+           /* //runPerformanceTests();
             //AssembleOverwatchResults();
             Console.WriteLine("Enter filepath:");
             string path = Console.ReadLine();
@@ -607,7 +698,7 @@ namespace RLNeuralNetwork
             }
             
             InputData[] wideData = data;
-
+            //createOWArray(data);
 
             for (int i = 49; i <= 51; i++)
             {
@@ -629,7 +720,7 @@ namespace RLNeuralNetwork
                 list.Add(d);
             }
 
-            testLoss(list.ToArray(), list.ToArray());
+            //testLoss(list.ToArray(), list.ToArray());
             Console.WriteLine("---");
             list = new List<InputData>();
             for (int i = 0; i < data.Length - 5; i++)
@@ -640,10 +731,10 @@ namespace RLNeuralNetwork
                 InputData d = new(inputs.ToArray(), new double[] {data[i].values[0]});
                 list.Add(d);
             }
-            testLoss(list.ToArray(), list.ToArray());
-            //createWDOWArray(data, wideData);
+            //testLoss(list.ToArray(), list.ToArray());
+            createWDOWArray(data, wideData);
             //createOWArray(data);
-            //overwatchParityTest();
+            //overwatchParityTest();*/
 
         }
     }
