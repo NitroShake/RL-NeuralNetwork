@@ -75,7 +75,7 @@ namespace RLNeuralNetwork
             return inputDatas.ToArray();
         }
 
-        static InputData[] ReadAdvancedOverwatchResults(string filePath)
+        static InputData[] ReadAdvancedOverwatchResults(string filePath, double newActiveDiscountRate = 0.85, double newIdleDiscountRate = 0.5, bool mainValueOnly = false)
         {
             StreamReader sr = new StreamReader(filePath);
             string arrayString = sr.ReadToEnd();
@@ -127,12 +127,12 @@ namespace RLNeuralNetwork
                             if (arrayNumbers[0][49] > 0 || arrayNumbers[0][50] > 0 || arrayNumbers[0][51] > 0)
                             {
                                 originalDiscountRate = 0.85;
-                                newDiscountRate = 0.9;
+                                newDiscountRate = newActiveDiscountRate;
                             }
                             else
                             {
                                 originalDiscountRate = 0.5;
-                                newDiscountRate = 0.55;
+                                newDiscountRate = newIdleDiscountRate;
                             }
                             if (k == 11)
                             {
@@ -154,8 +154,14 @@ namespace RLNeuralNetwork
                         finalValues[0] += finalValues[k];
                     }
 
-
-                    inputDatas.Add(new InputData(arrayNumbers[0][0..55], finalValues));
+                    if (mainValueOnly)
+                    {
+                        inputDatas.Add(new InputData(arrayNumbers[0][0..55], new double[] { finalValues[0] }));
+                    }
+                    else
+                    {
+                        inputDatas.Add(new InputData(arrayNumbers[0][0..55], finalValues));
+                    }
                 }
             }
             return inputDatas.ToArray();
@@ -311,8 +317,11 @@ namespace RLNeuralNetwork
             double valueCount = 0;
             for (int i = 0; i < data.Length; i++)
             {
-                averageValueMagnitude += Math.Abs(data[i].values[0]);
-                valueCount++;
+                if (data[i].values[0] != 0)
+                {
+                    averageValueMagnitude += Math.Abs(data[i].values[0]);
+                    valueCount++;
+                }
             }
 
             averageValueMagnitude /= valueCount;
@@ -354,8 +363,10 @@ namespace RLNeuralNetwork
                 metaLoss2 += loss2 / lossCount2;
                 metaLossCount2++;
             }
+            Console.WriteLine("regular NN");
             Console.WriteLine(metaLoss / metaLossCount);
             Console.WriteLine(metaLoss2 / metaLossCount2);
+            Console.WriteLine((metaLoss + metaLoss2) / (metaLossCount + metaLossCount2));
             Console.WriteLine((metaLoss + metaLoss2) / (metaLossCount + metaLossCount2) / averageValueMagnitude);
 
             Console.WriteLine("-------------------");
@@ -397,11 +408,11 @@ namespace RLNeuralNetwork
                 metaLossCount2+= lossCount2;
                 s = WDNN;
             }
+            Console.WriteLine("wide-deep NN");
             Console.WriteLine(metaLoss / metaLossCount);
             Console.WriteLine(metaLoss2 / metaLossCount2);
             Console.WriteLine((metaLoss + metaLoss2) / (metaLossCount + metaLossCount2));
             Console.WriteLine(((metaLoss + metaLoss2) / (metaLossCount + metaLossCount2)) / averageValueMagnitude);
-            Console.WriteLine("ee"); //literally just for breakpoints
         }
 
         static void createOWArray(InputData[] data)
@@ -525,6 +536,7 @@ namespace RLNeuralNetwork
         {
             Stopwatch stopwatch = new Stopwatch();
             int largeSize = 1000;
+            int mediumSize = 500;
             int smallSize = 200;
             int tinySize = 55;
             NeuralNetwork[] networks = new NeuralNetwork[]
@@ -533,6 +545,8 @@ namespace RLNeuralNetwork
                 new(new HiddenLayer[] { new HiddenLayer(tinySize, tinySize, 0.1, 0.01), new HiddenLayer(tinySize, tinySize, 0.1, 0.01) }, new OutputLayer(tinySize, 1, 0.01, 0.01)),
                 new(new HiddenLayer[] { new HiddenLayer(smallSize, smallSize, 0.1, 0.01) }, new OutputLayer(smallSize, 1, 0.01, 0.01)),
                 new(new HiddenLayer[] { new HiddenLayer(smallSize, smallSize, 0.1, 0.01), new HiddenLayer(smallSize, smallSize, 0.1, 0.01) }, new OutputLayer(smallSize, 1, 0.01, 0.01)),
+                new(new HiddenLayer[] { new HiddenLayer(mediumSize, mediumSize, 0.1, 0.01) }, new OutputLayer(mediumSize, 1, 0.01, 0.01)),
+                new(new HiddenLayer[] { new HiddenLayer(mediumSize, mediumSize, 0.1, 0.01), new HiddenLayer(mediumSize, mediumSize, 0.1, 0.01) }, new OutputLayer(mediumSize, 1, 0.01, 0.01)),
                 new(new HiddenLayer[] { new HiddenLayer(largeSize, largeSize, 0.1, 0.01) }, new OutputLayer(largeSize, 1, 0.01, 0.01)),
                 new(new HiddenLayer[] { new HiddenLayer(largeSize, largeSize, 0.1, 0.01), new HiddenLayer(largeSize, largeSize, 0.1, 0.01) }, new OutputLayer(largeSize, 1, 0.01, 0.01)),
                 //new(new HiddenLayer[] { new HiddenLayer(largeSize, (int)(largeSize * 0.6f), 0.1, 0.01), new HiddenLayer((int)(largeSize * 0.6f), (int)(largeSize * 0.6f), 0.1, 0.01) }, new OutputLayer((int)(largeSize * 0.6f), 1, 0.01, 0.01))
@@ -605,8 +619,8 @@ namespace RLNeuralNetwork
 
         static void Main(string[] args)
         {
-            Console.WriteLine("enter 1-6");
-            Console.Write("1. create OW array\n2. create wide-deep OW array\n3.test regular vs wide-deep using v1 results\n4. test regular vs wide-deep using v2 assembled results\n5. test NNs vs NNs with inputs from future\n6. assemble v2 results from folder\n7. create OW array from v2 assembled results\n8. create WD OW array from v2 assembled results\n9. performance tests\n");
+            Console.WriteLine("enter a corresponding number");
+            Console.Write("1. create OW array\n2. create wide-deep OW array\n3. test regular vs wide-deep using v1 results\n4. test regular vs wide-deep using v2 assembled results\n5. test NNs vs NNs with inputs from future, using assembled v2 results\n6. assemble v2 results from folder\n7. create OW array from v2 assembled results\n8. create WD OW array from v2 assembled results\n9. performance tests\n10. test myopic v2 assembled results\n");
             int input = -1;
             while(!int.TryParse(Console.ReadLine(), out input) && (input >= 1 || input <= 8))
             {
@@ -646,7 +660,9 @@ namespace RLNeuralNetwork
             {
                 Console.WriteLine("Enter filepath:");
                 string path = Console.ReadLine();
-                InputData[] data = ReadAdvancedOverwatchResults(path);
+                InputData[] data = ReadAdvancedOverwatchResults(path, 0.9, 0.6);
+                Console.WriteLine("With no future inputs:");
+                testLoss(data, data);
                 List<InputData> list = new List<InputData>();
                 for (int i = 0; i < data.Length - 5; i++)
                 {
@@ -656,6 +672,8 @@ namespace RLNeuralNetwork
                     InputData d = new(inputs.ToArray(), new double[] { data[i].values[0] });
                     list.Add(d);
                 }
+                Console.WriteLine("======================");
+                Console.WriteLine("With future inputs:");
                 testLoss(list.ToArray(), list.ToArray());
             }
             else if (input == 6)
@@ -673,12 +691,19 @@ namespace RLNeuralNetwork
             {
                 Console.WriteLine("Enter filepath:");
                 string path = Console.ReadLine();
-                InputData[] data = ReadAdvancedOverwatchResults(path);
+                InputData[] data = ReadAdvancedOverwatchResults(path, 0.9, 0.55);
                 createWDOWArray(data, data);
             }
             else if (input == 9)
             {
                 runPerformanceTests();
+            }
+            else if (input == 10)
+            {
+                Console.WriteLine("Enter filepath:");
+                string path = Console.ReadLine();
+                InputData[] data = ReadAdvancedOverwatchResults(path, 0.8, 0.25);
+                testLoss(data, data);
             }
 
 
